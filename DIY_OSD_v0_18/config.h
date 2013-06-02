@@ -1,4 +1,3 @@
-
 #ifndef config_h
 #define config_h
 
@@ -29,7 +28,7 @@
 
 // Current-sensor
 #define offset_ 0
-#define current_cal 0.24 
+#define current_cal 0.49 
 // These values should more or less be correct. Feel free to make a calibration (a few measurements and a linear approksimation) if you feel like it. 
 // 25 A sensor = 0.24
 // 50 A sensor = 0.49
@@ -60,7 +59,7 @@
 // to interrupt with the "new line sync". You can give it a try to see what it does - but I deffinately recommend to keep the text on the screen when flying :) 
 #define align_text_ 22
 
-// Depending on your model (plane/heli/car) it can be necessary to edit these parameters to show flight-summary only when landed. To disable it, just put for example 0 in speed. The speed will never be less than 0.  
+// Depending on your model (plane/heli/car) it can be necessary to edit these parameters to show flight-summary only when landed. To disable it, just put for example 0 in speed. The speed will never be less than 0. 
 
 // As default configured for standard plane
 ///*
@@ -81,7 +80,7 @@
 */
 
 // RSSI setup. Please note, when RSSI is active it will replace mah/km.
-#define show_rssi 0 // 1= on, 0 = off
+#define show_rssi 1 // 1= on, 0 = off
 #define rssi_cal 1 
 #define rssi_min 103 // Minimum RSSI-value. Will be voltage * 205. 0.5 volt = 103. You can set this to zero and just read the min value and max value
 #define rssi_input 1 // The input pin
@@ -102,7 +101,6 @@
 // If GPS-coordinates are hidden when flying higher than x m, GPS-coordinates can show every x second. If anyone uses this it should be updated a bit, right now it only looks at the last number
 // Value should be 1-9 (1 = show every second (always), 2 = show once every 2. second etc.)
 #define show_gps_coordinates_second 1
-
 
 // Dimming can be turned off. Mainly for debugging
 // 1 = on, 0 = off
@@ -126,9 +124,6 @@
 // 1 = on, 0 = off:
 #define Usebutton 1
 
-// The arduino-pin Button-pin is connected to:
-#define Buttonpin_ 2
-
 //======================================================
 // Set alarms. Will blink when value is exceeded
 //======================================================
@@ -144,115 +139,115 @@
 // Altitude alarm. altitude-number will blink if it exceeds the defined value. Should be written in meter, meaning 2000 meter = 2000, 4 km = 4000 etc. 
 #define alt_alarm_ 1100
 
-
-
 //========================================================================
 // END SETUP
 //========================================================================
 
 
 #if (video_system == 0)
-  // PAL
-  #define toplinetext 41
-  #define toplinenumbers 51
-  #define butlinenumbers 271
-  #define timer_line 252
-  #define gps_nmea_line 32
-  #define summaryline 102
-  #define current_calc_line 292
+	// PAL
+	#define toplinetext 41
+	#define toplinenumbers 51
+	#define butlinenumbers 271
+	#define timer_line 252
+	#define gps_nmea_line 32
+	#define summaryline 102
+	#define current_calc_line 292
 #else 
-  //NTSC
-  #define toplinetext 24
-  #define toplinenumbers 34
-  #define butlinenumbers 229
-  #define timer_line 210
-  #define gps_nmea_line 15
-  #define summaryline 100
-  #define current_calc_line 260
+	//NTSC
+	#define toplinetext 24
+	#define toplinenumbers 34
+	#define butlinenumbers 229
+	#define timer_line 210
+	#define gps_nmea_line 15
+	#define summaryline 100
+	#define current_calc_line 260
 #endif
 
 // Arduino
 #if (CONTROLLER == 0)
+	// Input from current-sensor and voltage-divider
+	#define voltage_divider_input 1
+	#define current_sensor_input 2
+	
+	// The arduino-pin Button-pin is connected to:
+	#define Buttonpin_ 2
+	
+	#if (dim_on == 1)
+		// This is used for dimming. can be changed to another pin if you want.
+		#define DimOn() do { DDRB |= 0b00000001; }while (0)
+		#define DimOff() do {DDRB &= 0b11111110; }while (0)
+	#else
+		#define DimOn() do { DDRB |= 0b00000000; }while (0)
+		#define DimOff() do {DDRB &= 0b11111111; }while (0)
+	#endif  
+	  
+	#define little_delay()
+  
+// SimpleOSD XL OPEN 16 mhz
+#elif (CONTROLLER==1)
+	// Input from current-sensor and voltage-divider
+	#define voltage_divider_input 7
+	#define current_sensor_input 4
+	
+	// Button is connected to:
+	#define Buttonpin_ 6 
+	
+	#if (dim_on == 1)
+		// This is used for dimming. can be changed to another pin if you want. 
+		//define SimpleOSD OPEN's dim pin C5 ,  SimpleOSD X2's dim pin B1
+		//SimpleOSD OPEN XL
+		#define DimOn() do { DDRC |= 0b00100000; }while (0)
+		#define DimOff() do {DDRC &= 0b11011111; }while (0)
+	#else
+		#define DimOn() do { DDRB |= 0b00000000; }while (0)
+		#define DimOff() do {DDRB &= 0b11111111; }while (0)
+	#endif    
+	  
+	#define little_delay() _delay_loop_1(13) 
 
-// Input from current-sensor and voltage-divider
-  #define voltage_divider_input 1
-  #define current_sensor_input 2
-
-
-#if (dim_on == 1)
-// This is used for dimming. can be changed to another pin if you want. 
-  #define DimOn  DDRB |= 0b00000001;
-  #define DimOff DDRB &= 0b11111110;
-#else
-  #define DimOn  DDRB |= 0b00000000;
-  #define DimOff DDRB &= 0b11111111;
-#endif  
-  
-  #define little_delay
-  
-  
- // SimpleOSD XL OPEN 16 mhz
-#elseif (CONTROLLER==1)
-         
-  // Input from current-sensor and voltage-divider
-  #define voltage_divider_input 7
-  #define current_sensor_input 4
-  
-#if (dim_on == 1)
-// This is used for dimming. can be changed to another pin if you want. 
- //define SimpleOSD OPEN's dim pin C5 ,  SimpleOSD X2's dim pin B1
- //SimpleOSD OPEN XL
- #define DimOn  DDRC |= 0b00100000;
- #define DimOff DDRC &= 0b11011111;
-
-#else
-  #define DimOn  DDRB |= 0b00000000;
-  #define DimOff DDRB &= 0b11111111;
-#endif    
-  
-  #define little_delay _delay_loop_1(13);
- 
- // SimpleOSD X2 16 mhz
-#else
-         
-  // Input from current-sensor and voltage-divider
-  #define voltage_divider_input 0
-  #define current_sensor_input 1
-  
-#if (dim_on == 1)
-// This is used for dimming. can be changed to another pin if you want. 
- //define SimpleOSD X2's dim pin B1
-  #define DimOn  DDRB |= 0b00000010;
-  #define DimOff DDRB &= 0b11111101;
-#else
-  #define DimOn  DDRB |= 0b00000000;
-  #define DimOff DDRB &= 0b11111111;
-#endif    
-  
-  #define little_delay _delay_loop_1(13);
-  
+// SimpleOSD X2 16 mhz
+#else     
+	// Input from current-sensor and voltage-divider
+	#define voltage_divider_input 0
+	#define current_sensor_input 1
+	
+	// Button is connected to:
+	#define Buttonpin_ 6
+	
+	#if (dim_on == 1)
+		// This is used for dimming. can be changed to another pin if you want. 
+		//define SimpleOSD X2's dim pin B1
+		#define DimOn() do { DDRB |= 0b00000010; }while (0)
+		#define DimOff() do {DDRB &= 0b11111101; }while (0)
+	#else
+		#define DimOn() do {DDRB |= 0b00000000; }while (0)
+		#define DimOff() do {DDRB &= 0b11111111; }while (0)
+	#endif
+	  
+	#define little_delay() _delay_loop_1(13)
 #endif
 
-#define mux_currentSens ADMUX = (0<<MUX3) | (0<<MUX2) | (0<<MUX1) | (current_sensor_input<<MUX0) | (1<<REFS0) |(0<<REFS1);
-#define mux_batVoltage ADMUX = (0<<MUX3) | (0<<MUX2) | (0<<MUX1) | (voltage_divider_input<<MUX0) | (1<<REFS0) |(0<<REFS1);
-#define mux_rssi ADMUX = (0<<MUX3) | (0<<MUX2) | (0<<MUX1) | (rssi_input<<MUX0) | (1<<REFS0) |(0<<REFS1);
+#define mux_currentSens() do { ADMUX = (0<<MUX3) | (0<<MUX2) | (0<<MUX1) | (current_sensor_input<<MUX0) | (1<<REFS0) |(0<<REFS1); } while (0)
+#define mux_batVoltage() do { ADMUX = (0<<MUX3) | (0<<MUX2) | (0<<MUX1) | (voltage_divider_input<<MUX0) | (1<<REFS0) |(0<<REFS1); } while (0)
+#define mux_rssi() do { ADMUX = (0<<MUX3) | (0<<MUX2) | (0<<MUX1) | (rssi_input<<MUX0) | (1<<REFS0) |(0<<REFS1); } while (0)
 
 // Lets define some delays
-#define delay15 __asm__("nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t"); 
-#define delay14 __asm__("nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t"); 
-#define delay13 __asm__("nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t"); 
-#define delay12 __asm__("nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t"); 
-#define delay11 __asm__("nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t"); 
-#define delay10 __asm__("nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t"); 
-#define delay9  __asm__("nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t"); 
-#define delay8  __asm__("nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t"); 
-#define delay7  __asm__("nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t"); 
-#define delay6  __asm__("nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t"); 
-#define delay5  __asm__("nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t"); 
-#define delay4  __asm__("nop\n\t""nop\n\t""nop\n\t""nop\n\t"); 
-#define delay3  __asm__("nop\n\t""nop\n\t""nop\n\t"); 
-#define delay2  __asm__("nop\n\t""nop\n\t"); 
-#define delay1  __asm__("nop\n\t"); 
+#define delay15() do { __asm__("nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t"); } while(0)
+#define delay14() do { __asm__("nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t"); } while(0)
+#define delay13() do { __asm__("nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t"); } while(0)
+#define delay12() do { __asm__("nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t"); } while(0)
+#define delay11() do { __asm__("nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t"); } while(0)
+#define delay10() do { __asm__("nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t"); } while(0)
+#define delay9() do {  __asm__("nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t"); } while(0)
+#define delay8() do {  __asm__("nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t"); } while(0)
+#define delay7() do {  __asm__("nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t"); } while(0)
+#define delay6() do {  __asm__("nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t"); } while(0)
+#define delay5() do {  __asm__("nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t"); } while(0)
+#define delay4() do {  __asm__("nop\n\t""nop\n\t""nop\n\t""nop\n\t"); } while(0)
+#define delay3() do {  __asm__("nop\n\t""nop\n\t""nop\n\t"); } while(0)
+#define delay2() do {  __asm__("nop\n\t""nop\n\t"); } while(0)
+#define delay1() do {  __asm__("nop\n\t"); } while(0)
 
 #define clock 16000000
 #define BAUD_SETTINGS clock/16/BAUD-1

@@ -27,162 +27,144 @@ extern int line;
 
 
 void setup() {
-  // Set pin-modes:
-pinMode(10,OUTPUT);
-pinMode(11,OUTPUT);  
-pinMode(12,OUTPUT);
-pinMode(13,OUTPUT);
+	// Set pin-modes:
+	pinMode(10,OUTPUT);
+	pinMode(11,OUTPUT);  
+	pinMode(12,OUTPUT);
+	pinMode(13,OUTPUT);
 
-pinMode(0,INPUT);  
-pinMode(1,INPUT);
-pinMode(2,INPUT);
-pinMode(3,INPUT);
-pinMode(4,INPUT);  
-pinMode(5,INPUT);
-pinMode(6,INPUT); 
-pinMode(7,INPUT);
-pinMode(8,INPUT);  
+	pinMode(0,INPUT);  
+	pinMode(1,INPUT);
+	pinMode(2,INPUT);
+	pinMode(3,INPUT);
+	pinMode(4,INPUT);  
+	pinMode(5,INPUT);
+	pinMode(6,INPUT); 
+	pinMode(7,INPUT);
+	pinMode(8,INPUT);  
 
-//Define SimpleOSD X2 dim pin
+	//Define SimpleOSD X2 dim pin
 #if (CONTROLLER == 2) 
-   pinMode(9,OUTPUT);
+	pinMode(9,OUTPUT);
 #else
-   pinMode(9,INPUT);
+	pinMode(9,INPUT);
 #endif
 
 
-// Init Serial communication. 
-Serial.begin(BAUD);
- UBRR0H = (unsigned char) (BAUD_SETTINGS>>8);
- UBRR0L = (unsigned char) (BAUD_SETTINGS);
- UCSR0A = 0b0000000;
- UCSR0B = (1<<RXEN0) | (1<<TXEN0);
- UCSR0C = (3<<UCSZ00);
+	// Init Serial communication. 
+	Serial.begin(BAUD);
+	UBRR0H = (unsigned char) (BAUD_SETTINGS>>8);
+	UBRR0L = (unsigned char) (BAUD_SETTINGS);
+	UCSR0A = 0b0000000;
+	UCSR0B = (1<<RXEN0) | (1<<TXEN0);
+	UCSR0C = (3<<UCSZ00);
 
-// Used to set the GPS update-rate to 5 hz, and GPGGA and GPRMC gps-strings (Only for MKT-GPS).
+	// Used to set the GPS update-rate to 5 hz, and GPGGA and GPRMC gps-strings (Only for MKT-GPS).
 
-  Serial.print("$PMTK300,200,0,0,0,0*2F");
-  Serial.write(13);
-  Serial.write(10); 
+	Serial.print("$PMTK300,200,0,0,0,0*2F");
+	Serial.write(13);
+	Serial.write(10); 
 
-  Serial.print("$PMTK314,0,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0*28");
-  Serial.write(13);
-  Serial.write(10);
-
+	Serial.print("$PMTK314,0,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0*28");
+	Serial.write(13);
+	Serial.write(10);
  
-// Enable SPI for pixel generation
-// Set SPI;  
-  SPCR = 
-  (1<<SPE) | //Enable SPI
-  (1<<MSTR)| // Set as master
-  (0<<SPR1)| // Max speed
-  (0<<SPR0)| // Max speed
-  (0<<DORD)| // Year, Try to set this to 1 :D (Will mirror the byte)
-  (1<<CPOL)| // Doesnt really matter, its the SCK polarity
-  (1<<CPHA); //
+	// Enable SPI for pixel generation
+	// Set SPI;  
+	SPCR = 
+		(1<<SPE) | //Enable SPI
+		(1<<MSTR)| // Set as master
+		(0<<SPR1)| // Max speed
+		(0<<SPR0)| // Max speed
+		(0<<DORD)| // Year, Try to set this to 1 :D (Will mirror the byte)
+		(1<<CPOL)| // Doesnt really matter, its the SCK polarity
+		(1<<CPHA); //
   
-  SPSR = (1<<SPI2X); // SPI double speed - we want 8 mhz output speed.
-  SPDR =0b00000000; // IMPORTANT.. The SPI will idle random at low or high in the beginning. If it idles high you will get black screen = bad idea in FPV.
-  // It will always idle at the last bit sent, so always be sure the last bit is 0. The main-loop and end of each line will always send 8 zeros - so it should
-  // be pretty safe. 
+	SPSR = (1<<SPI2X); // SPI double speed - we want 8 mhz output speed.
+	SPDR =0b00000000; // IMPORTANT.. The SPI will idle random at low or high in the beginning. If it idles high you will get black screen = bad idea in FPV.
+	// It will always idle at the last bit sent, so always be sure the last bit is 0. The main-loop and end of each line will always send 8 zeros - so it should
+	// be pretty safe. 
   
-// Analog read enable and set prescale. You can change prescale if you like.
-  ADCSRA = (1<<ADEN) | (1<<ADPS2) | (0<<ADPS1) | (1<<ADPS0);
+	// Analog read enable and set prescale. You can change prescale if you like.
+	ADCSRA = (1<<ADEN) | (1<<ADPS2) | (0<<ADPS1) | (1<<ADPS0);
   
-// Disable standard Arduino interrupts used for timer etc. (you can clearly see the text flicker if they are not disabled)
-  TIMSK0=0;
-  TIMSK1=0;
-  TIMSK2=0;
+	// Disable standard Arduino interrupts used for timer etc. (you can clearly see the text flicker if they are not disabled)
+	TIMSK0=0;
+	TIMSK1=0;
+	TIMSK2=0;
   
-// If Arduino is used
-if (CONTROLLER == 0) {
-// Init analog comparator to register new line and frame
-  ADCSRB = 0b00000001; // Set analog comparator mode
+	// If Arduino is used
+	if (CONTROLLER == 0) {
+		// Init analog comparator to register new line and frame
+		ADCSRB = 0b00000001; // Set analog comparator mode
   
-  ACSR = 0b00001011; //Enable Analog comparator interrupt 
+		ACSR = 0b00001011; //Enable Analog comparator interrupt 
 
-// Set interrupt on falling output edge.  
-  ADCSRA|=(1<<ADSC);    
+		// Set interrupt on falling output edge.  
+		ADCSRA|=(1<<ADSC);    
   
-// Start timer 2 - used to determine if it's a new frame or line. 
-  TCCR2B =
-  (0<<CS22) | //Prescale 1024
-  (0<<CS21) | //Prescale 1024
-  (1<<CS20) | //Prescale 1024
-  (0<<WGM22); // CTC mode (Clear timer on compare match)  
+		// Start timer 2 - used to determine if it's a new frame or line. 
+		TCCR2B =
+			(0<<CS22) | //Prescale 1024
+			(0<<CS21) | //Prescale 1024
+			(1<<CS20) | //Prescale 1024
+			(0<<WGM22); // CTC mode (Clear timer on compare match)  
 
-// Button with internal pull-up.  
-  pinMode(Buttonpin_,INPUT);
-  digitalWrite(Buttonpin_,HIGH);
-}
+		
+	}
 
-// If SimpleOSD XL /LM1881
-if (CONTROLLER ==1) {
-  attachInterrupt(0,detectline,FALLING);
-  attachInterrupt(1,detectframe,RISING);  
-  pinMode(5,OUTPUT);
-  digitalWrite(5,HIGH); // Turn on the led
+	// If SimpleOSD XL /LM1881
+	if (CONTROLLER ==1) {
+		attachInterrupt(0,detectline,FALLING);
+		attachInterrupt(1,detectframe,RISING);  
+		pinMode(5,OUTPUT);
+		digitalWrite(5,HIGH); // Turn on the led
+	}
 
-// Button with internal pull-up.
-  pinMode(6,INPUT);
-  digitalWrite(6,HIGH);
+	// If SimpleOSD X2/LM1881
+	if (CONTROLLER ==2) {
+		attachInterrupt(0,detectline,FALLING);
+		attachInterrupt(1,detectframe,RISING);  
+		pinMode(13,OUTPUT);
+		digitalWrite(13,HIGH); // Turn on the led
+	}
+	
+	// Button with internal pull-up.  
+	pinMode(Buttonpin_,INPUT);
+	digitalWrite(Buttonpin_,HIGH);
 
-}
-
-// If SimpleOSD X2/LM1881
-if (CONTROLLER ==2) {
-  attachInterrupt(0,detectline,FALLING);
-  attachInterrupt(1,detectframe,RISING);  
-  pinMode(13,OUTPUT);
-  digitalWrite(13,HIGH); // Turn on the led
-
-// Button with internal pull-up.
-  pinMode(6,INPUT);
-  digitalWrite(6,HIGH);
-
-}
-
-
-
-
-
-// If the controller have not been configured yet. 
-if ((EEPROM.read(0) != 52) | (reset_values == 1)) {
-  EEPROM.write(0,52);
+	// If the controller have not been configured yet. 
+	if ((EEPROM.read(0) != 52) | (reset_values == 1)) {
+		EEPROM.write(0,52);
   
-  // Show_mah_km
-  EEPROM.write(1,show_mah_km_);
+		// Show_mah_km
+		EEPROM.write(1,show_mah_km_);
   
-  // Show decimals
-  EEPROM.write(2,show_decimals_);
+		// Show decimals
+		EEPROM.write(2,show_decimals_);
   
-  // Altitude offset
-  EEPROM.write(3,altitude_offset_on_);
+		// Altitude offset
+		EEPROM.write(3,altitude_offset_on_);
   
-  // Align text
-  EEPROM.write(4,align_text_);
+		// Align text
+		EEPROM.write(4,align_text_);
   
-  // Show plane pos
-  EEPROM.write(5,show_plane_pos_);  
+		// Show plane pos
+		EEPROM.write(5,show_plane_pos_);  
   
-  // Alt alarm
-  EEPROM.write(10,(unsigned char) alt_alarm_);
-  EEPROM.write(11,(unsigned char) (alt_alarm_>>8));  
+		// Alt alarm
+		EEPROM.write(10,(unsigned char) alt_alarm_);
+		EEPROM.write(11,(unsigned char) (alt_alarm_>>8));  
   
-  EEPROM.write(12,(unsigned char) los_alarm_);
-  EEPROM.write(13,(unsigned char) (los_alarm_>>8));  
+		EEPROM.write(12,(unsigned char) los_alarm_);
+		EEPROM.write(13,(unsigned char) (los_alarm_>>8));  
 
-  EEPROM.write(14,(unsigned char) volt_alarm_);
-  EEPROM.write(15,(unsigned char) (volt_alarm_>>8));  
+		EEPROM.write(14,(unsigned char) volt_alarm_);
+		EEPROM.write(15,(unsigned char) (volt_alarm_>>8));  
 
-  EEPROM.write(16,(unsigned char) mah_alarm_);
-  EEPROM.write(17,(unsigned char) (mah_alarm_>>8));    
-}
-
-
-
-
-
+		EEPROM.write(16,(unsigned char) mah_alarm_);
+		EEPROM.write(17,(unsigned char) (mah_alarm_>>8));    
+	}
 }
 
 
@@ -193,20 +175,20 @@ if ((EEPROM.read(0) != 52) | (reset_values == 1)) {
 // ====================================================================================================================================================================================================================
 // Analog comparator interrupt:
 ISR(ANALOG_COMP_vect) {
-       // Reset counter
-       TCNT2 =0; 
+	// Reset counter
+	TCNT2 =0; 
 
-       // Wait for the sync to go high again;
-       while ((ACSR & 0b00100000) == 0b00100000) { }  
+	// Wait for the sync to go high again;
+	while ((ACSR & 0b00100000) == 0b00100000) { }  
       
-      // If the counter has exceeded the "new line sync time", it's a new 
-      // frame. In that case, we just need to reset the line-counter.  
-      // 
-      if (TCNT2 > 75) {
-      line = 0;
-      }  
+	// If the counter has exceeded the "new line sync time", it's a new 
+	// frame. In that case, we just need to reset the line-counter.  
+	// 
+	if (TCNT2 > 75) {
+		line = 0;
+	}  
   
- detectline(); 
+	detectline(); 
 }
 
 
@@ -216,10 +198,7 @@ ISR(ANALOG_COMP_vect) {
 // ====================================================================================================================================================================================================================
 
 void loop() {
-  gps();
+	gps();
 
 }
-
-
-
 
