@@ -10,8 +10,8 @@
 // from code version 5, support for 16 mhz SimpleOSD with Arduino bootloader have been added. It uses the 
 //same microcontroller etc - but a LM1881 chip is used to detect new lines and frames.
 
-//Arduino = 0, SimpleOSD = 1
-#define CONTROLLER 0
+//Arduino = 0, SimpleOSD OPEN = 1, SimpleOSD X2 = 2
+#define CONTROLLER 2
 
 //===========================
 // Video system: PAL or NTSC
@@ -191,8 +191,8 @@
   #define little_delay
   
   
- // SimpleOSD XL 16 mhz
-#else
+ // SimpleOSD XL OPEN 16 mhz
+#elseif (CONTROLLER==1)
          
   // Input from current-sensor and voltage-divider
   #define voltage_divider_input 7
@@ -200,15 +200,34 @@
   
 #if (dim_on == 1)
 // This is used for dimming. can be changed to another pin if you want. 
- //define SimpleOSD OPEN's dim pin C5
-  #define DimOn  DDRC |= 0b00100000;
-  #define DimOff DDRC &= 0b11011111;
+ //define SimpleOSD OPEN's dim pin C5 ,  SimpleOSD X2's dim pin B1
+ //SimpleOSD OPEN XL
+ #define DimOn  DDRC |= 0b00100000;
+ #define DimOff DDRC &= 0b11011111;
+
 #else
   #define DimOn  DDRB |= 0b00000000;
   #define DimOff DDRB &= 0b11111111;
 #endif    
   
-
+  #define little_delay _delay_loop_1(13);
+ 
+ // SimpleOSD X2 16 mhz
+#else
+         
+  // Input from current-sensor and voltage-divider
+  #define voltage_divider_input 0
+  #define current_sensor_input 1
+  
+#if (dim_on == 1)
+// This is used for dimming. can be changed to another pin if you want. 
+ //define SimpleOSD X2's dim pin B1
+  #define DimOn  DDRB |= 0b00000010;
+  #define DimOff DDRB &= 0b11111101;
+#else
+  #define DimOn  DDRB |= 0b00000000;
+  #define DimOff DDRB &= 0b11111111;
+#endif    
   
   #define little_delay _delay_loop_1(13);
   

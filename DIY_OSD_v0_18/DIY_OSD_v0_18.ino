@@ -42,7 +42,13 @@ pinMode(5,INPUT);
 pinMode(6,INPUT); 
 pinMode(7,INPUT);
 pinMode(8,INPUT);  
-pinMode(9,INPUT);
+
+//Define SimpleOSD X2 dim pin
+#if (CONTROLLER == 2) 
+   pinMode(9,OUTPUT);
+#else
+   pinMode(9,INPUT);
+#endif
 
 
 // Init Serial communication. 
@@ -110,12 +116,25 @@ if (CONTROLLER == 0) {
   digitalWrite(Buttonpin_,HIGH);
 }
 
-// If SimpleOSD/LM1881
-if (CONTROLLER == 1) {
+// If SimpleOSD XL /LM1881
+if (CONTROLLER ==1) {
   attachInterrupt(0,detectline,FALLING);
   attachInterrupt(1,detectframe,RISING);  
   pinMode(5,OUTPUT);
   digitalWrite(5,HIGH); // Turn on the led
+
+// Button with internal pull-up.
+  pinMode(6,INPUT);
+  digitalWrite(6,HIGH);
+
+}
+
+// If SimpleOSD X2/LM1881
+if (CONTROLLER ==2) {
+  attachInterrupt(0,detectline,FALLING);
+  attachInterrupt(1,detectframe,RISING);  
+  pinMode(13,OUTPUT);
+  digitalWrite(13,HIGH); // Turn on the led
 
 // Button with internal pull-up.
   pinMode(6,INPUT);
