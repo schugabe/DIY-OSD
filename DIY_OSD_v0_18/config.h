@@ -182,7 +182,7 @@
 		#define DimOff() do {DDRB &= 0b11111111; }while (0)
 	#endif  
 	  
-	#define little_delay()
+	#define little_delay() do {} while (0)
   
 // SimpleOSD XL OPEN 16 mhz
 #elif (CONTROLLER==1)
