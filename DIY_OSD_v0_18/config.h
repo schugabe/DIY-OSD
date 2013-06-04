@@ -80,10 +80,11 @@
 */
 
 // RSSI setup. Please note, when RSSI is active it will replace mah/km.
+#define digital_rssi 0 // 1=on, 0 = off
 #define show_rssi 1 // 1= on, 0 = off
 #define rssi_cal 1 
 #define rssi_min 103 // Minimum RSSI-value. Will be voltage * 205. 0.5 volt = 103. You can set this to zero and just read the min value and max value
-#define rssi_input 1 // The input pin
+
 
 // I was asked to make a calculation on mah/km - this can be useful to find the most efficient cruise-speed etc.
 // It can be turned on and off as you want. Please note that it will only update when the speed is > 1 km/h.
@@ -169,7 +170,8 @@
 	// Input from current-sensor and voltage-divider
 	#define voltage_divider_input 1
 	#define current_sensor_input 2
-	
+	#define rssi_input 1 // The input pin
+
 	// The arduino-pin Button-pin is connected to:
 	#define Buttonpin_ 2
 	
@@ -189,7 +191,8 @@
 	// Input from current-sensor and voltage-divider
 	#define voltage_divider_input 7
 	#define current_sensor_input 4
-	
+	#define rssi_input 1 // The input pin
+
 	// Button is connected to:
 	#define Buttonpin_ 6 
 	
@@ -211,7 +214,8 @@
 	// Input from current-sensor and voltage-divider
 	#define voltage_divider_input 0
 	#define current_sensor_input 1
-	
+	#define rssi_input 2 // The input pin for analog rssi is adc2 (PC2 or AN2 on scematic)
+
 	// Button is connected to:
 	#define Buttonpin_ 6
 	
