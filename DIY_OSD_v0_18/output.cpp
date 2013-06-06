@@ -1,14 +1,14 @@
-
-
-#include "config.h"
-#include "ascii.h"
-#include "output.h"
-#include "variables.h"
+#include "Arduino.h"
 
 #include <avr/delay.h>
 #include <avr/pgmspace.h>
 #include <EEPROM.h>
 
+#include "config.h"
+#include "ascii.h"
+#include "output.h"
+#include "variables.h"
+#include "pwm.h"
 
 extern unsigned char align_text;
 extern unsigned char flight_timer[];
@@ -61,14 +61,73 @@ extern unsigned char altitude2[10];
 extern unsigned char altituder[10];
 
 
+// RSSI PWM Input
+typedef enum { falling, rising } pwm_state_t;
 
+volatile static uint16_t rising_ticks, falling_ticks;
+volatile static pwm_state_t state;
+volatile static uint16_t duration = 0;
 
+#define SET_RISING()  TCCR1B |=  (1<<ICES1)
+#define SET_FALLING() TCCR1B &= ~(1<<ICES1)
+
+void pwm_enable() {
+	state = rising;
+	rising_ticks = falling_ticks = 0;
+	SET_RISING();
+	//clear any pending interrupt, wait for next rising edge
+	TIFR1 |= (1<<ICF1);
+	
+	//enable interrupt
+	TIMSK1 |= (1<<ICIE1);
+}
+
+void pwm_disable() {
+	state = rising;
+	//disable interrupt
+	TIMSK1 &= ~(1<<ICIE1);
+}
+
+// input capture interrupt
+ISR(TIMER1_CAPT_vect) {
+	// if we are capturing rising edge store start time and wait for falling edge
+	if (state == rising) {
+		rising_ticks = ICR1;
+		state = falling;
+		SET_FALLING();
+	}
+	// if we are capturing falling edge store value and calculate duration
+	else if (state == falling) {
+		falling_ticks = ICR1;
+		state = rising;
+		
+		if (rising_ticks > falling_ticks)
+			duration = rising_ticks - falling_ticks;
+		else 
+			duration = falling_ticks - rising_ticks;
+		
+		// turn off capturing after first measurement
+		pwm_disable();
+	}
+}
+
+unsigned char pwm_getPercentage(unsigned short min_v, unsigned short max_v) {
+	uint32_t tmp = duration - min_v;
+	
+	tmp *= 100;
+	tmp /= (uint32_t)(max_v-min_v);
+	
+	if (tmp > 100)
+		tmp = 100;
+	
+	return tmp;
+}
+
+// frame output
 
 void detectframe() {
 	line=0;
 }
-
-
 
 void detectline() {
 	little_delay(); // This is used to adjust to timing when using SimpleOSD instead of Arduino
@@ -1598,7 +1657,7 @@ void detectline() {
 		}
 	}
 	// ============================================================
-	// Buttom line text END
+	// Bottom line text END
 	// ============================================================
 	// As a quick and dirty implementation the timing from the video-signal
 	// is used to calculate the power consumption (mAh). But if it looses sync you
@@ -1616,26 +1675,32 @@ void detectline() {
 		if (loopcount == 10) {
 			loopcount=0;
 		}
-		// with 10 bit ADC and 5 volt ref coltage we have;
-		// (with 50 A current sensor)
-		// 1024/5 = 205 = 1 volt = 10 A
-		// First the ADC is set to take a reading;
+		
 		if (loopcount == 0) {
-			// The ADC is 10 bit, so we have to read from 2 registers.
-			ADCtemp=ADCL;
-			ADCtemp2=ADCH;
-			// Adding the high and low register;
-			rssi_reading=ADCtemp+(ADCtemp2<<8);
-			rssi_reading=(rssi_reading-rssi_min)*rssi_cal;
-			rssi_negative=0;
-			if (rssi_reading < 0) {
-				rssi_negative = 1;
-				rssi_reading=rssi_reading*(-1);
-			}
+			#if (digital_rssi == 0)
+				// with 10 bit ADC and 5 volt ref coltage we have;
+				// (with 50 A current sensor)
+				// 1024/5 = 205 = 1 volt = 10 A
+				// First the ADC is set to take a reading;
+				// The ADC is 10 bit, so we have to read from 2 registers.
+				ADCtemp=ADCL;
+				ADCtemp2=ADCH;
+				// Adding the high and low register;
+				rssi_reading=ADCtemp+(ADCtemp2<<8);
+				rssi_reading=(rssi_reading-rssi_min)*rssi_cal;
+				rssi_negative=0;
+				if (rssi_reading < 0) {
+					rssi_negative = 1;
+					rssi_reading=rssi_reading*(-1);
+				}
+			
+			#else 
+				rssi_reading = pwm_getPercentage(rssi_min,rssi_max);
+			#endif
+			
 			rssir[0]= (rssi_reading / 100)+3;
 			rssir[1]= ((rssi_reading % 100) / 10)+3;
 			rssir[2]= ((rssi_reading % 100) % 10)+3;
-			//SPDR=0b11111110;
 		}
 		if (loopcount == 1) {
 			// Setup ADC to be used with current sensor
@@ -1736,10 +1801,16 @@ void detectline() {
 			mahr[4]=((((mahtemp % 10000) % 1000) % 100) % 10)+3;
 			// Timing seems fine - just at the end of the line
 			//SPDR=0b11111100;
-			// Setup ADC to be used with RSSI
-			mux_rssi();
-			// Start the conversion (ADC)
-			ADCSRA|=(1<<ADSC);
+			if (digital_rssi == 0) {
+				// Setup ADC to be used with RSSI
+				mux_rssi();
+				// Start the conversion (ADC)
+				ADCSRA|=(1<<ADSC);
+			}
+			else {
+				// Capture the rssi pwm value
+				pwm_enable();
+			}
 		}
 	}
 	// ============================================================

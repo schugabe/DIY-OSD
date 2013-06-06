@@ -19,12 +19,12 @@
 #include "output.h"
 #include "gps.h"
 
+
 #include <avr/delay.h>
 #include <avr/pgmspace.h>
 #include <EEPROM.h>
 
 extern int line;
-
 
 void setup() {
 	// Set pin-modes:
@@ -108,9 +108,7 @@ void setup() {
 			(0<<CS22) | //Prescale 1024
 			(0<<CS21) | //Prescale 1024
 			(1<<CS20) | //Prescale 1024
-			(0<<WGM22); // CTC mode (Clear timer on compare match)  
-
-		
+			(0<<WGM22); // CTC mode (Clear timer on compare match)
 	}
 
 	// If SimpleOSD XL /LM1881
@@ -127,6 +125,21 @@ void setup() {
 		attachInterrupt(1,detectframe,RISING);  
 		pinMode(13,OUTPUT);
 		digitalWrite(13,HIGH); // Turn on the led
+
+                // enable pwm rssi input
+                #if (digital_rssi==1)
+		  pinMode(RSSI_INPUT_PIN,INPUT); 
+		  digitalWrite(RSSI_INPUT_PIN,HIGH);  
+    
+		  // nothing needed here
+		  TCCR1A = (0<<WGM10) | (0<<WGM11) | (0<<COM1A1) | (0<<COM1A0) | (0<<COM1B1) | (0<<COM1B0);
+	
+		  // set input capture rising, prescaler 8
+		  TCCR1B = (1<<ICNC1) | (1<<ICES1) | (0<<CS10) | (1<<CS11) | (0<<CS12) | (0<<WGM13)| (0<<WGM12);
+ 
+	 	  // turn off output compare
+		  TCCR1C = (0<<FOC1A) | (0<<FOC1B);
+                #endif
 	}
 	
 	// Button with internal pull-up.  
@@ -199,6 +212,5 @@ ISR(ANALOG_COMP_vect) {
 
 void loop() {
 	gps();
-
 }
 

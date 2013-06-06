@@ -80,11 +80,23 @@
 */
 
 // RSSI setup. Please note, when RSSI is active it will replace mah/km.
-#define digital_rssi 0 // 1=on, 0 = off
+#define digital_rssi 1 // 1=on, 0 = off
 #define show_rssi 1 // 1= on, 0 = off
-#define rssi_cal 1 
-#define rssi_min 103 // Minimum RSSI-value. Will be voltage * 205. 0.5 volt = 103. You can set this to zero and just read the min value and max value
 
+#if (digital_rssi == 0)
+	#define rssi_cal 1 
+	// Minimum RSSI-value. Will be voltage * 205. 0.5 volt = 103. You can set this to zero and just read the min value and max value
+	#define rssi_min 103
+#else
+	// Min/Max Values for rssi pwm duration, in this case for ezuhf signal quality. 
+	// values from https://github.com/AeroQuad/AeroQuad/blob/master/Libraries/AQ_RSSI/EzUHFRSSIReader.h
+	#define rssi_min 1614
+	#define rssi_max 2001
+	
+	// example values for rssi signal
+	//#define rssi_min 1001
+	//#define rssi_max 2000
+#endif
 
 // I was asked to make a calculation on mah/km - this can be useful to find the most efficient cruise-speed etc.
 // It can be turned on and off as you want. Please note that it will only update when the speed is > 1 km/h.
@@ -219,6 +231,8 @@
 	// Button is connected to:
 	#define Buttonpin_ 6
 	
+	#define RSSI_INPUT_PIN 8
+ 
 	#if (dim_on == 1)
 		// This is used for dimming. can be changed to another pin if you want. 
 		//define SimpleOSD X2's dim pin B1
