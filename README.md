@@ -8,3 +8,4 @@ Includes support for SimpleOSD X2 from Flytron http://www.rcgroups.com/forums/sh
 Changes:
 * fixed a bug where wrong pin for config button was read on SimpleOSD X2
 * changed analog rssi input to PC2 Pin (ADC or AN2 on schematic) for SimpleOSD X2
+* added support for digital pwm rssi input on PIN PB0 for SimpleOSD X2 (is untested currently)
