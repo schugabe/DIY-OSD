@@ -168,7 +168,7 @@ unsigned int mahkm =0;
 unsigned char mahkmr[]={3,3,3,3,3,3};
 
 void gps() {
-	if (CONTROLLER == 1 | Usebutton == 1) {
+	if (CONTROLLER == 1 || Usebutton == 1) {
 		if (digitalRead(Buttonpin)==LOW) {
     
 			GPSbuffer[0]=((alt_alarm/1000)+3)<<3;
@@ -365,7 +365,7 @@ void gps() {
 			}
 		}
 	}
-	
+
 	while (1==1) {
     
 		SPDR =0b00000000;

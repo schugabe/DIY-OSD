@@ -147,7 +147,7 @@ void setup() {
 	digitalWrite(Buttonpin_,HIGH);
 
 	// If the controller have not been configured yet. 
-	if ((EEPROM.read(0) != 52) | (reset_values == 1)) {
+	if ((EEPROM.read(0) != 52) || (reset_values == 1)) {
 		EEPROM.write(0,52);
   
 		// Show_mah_km

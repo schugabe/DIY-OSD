@@ -16,7 +16,7 @@
 // Video system: PAL or NTSC
 //===========================
 // Pal = 0, NTSC = 1
-#define VIDEO_SYSTEM 0
+#define VIDEO_SYSTEM 1
 
 
 //=============================================================================================
@@ -51,7 +51,7 @@
 
 // Delay when setting home position. When GPS have GPS-fix the homeposition will automatically be set. For better accuracy a delay can be added. The delay is defined as GPS update-rate / value set.
 // Example: 5 hz GPS with 25 delay will give 5 hz / 25 delay = 5 seconds delay.
-#define set_home_delay 25
+#define set_home_delay 50
 
 // Align text. On different screens/video signals I have seen, that the text is not alligned perfectly. Decreasing the number will move all text left, increasing the number will move it right.
 // Smallest number allowed is 1
@@ -86,13 +86,11 @@
 #if (digital_rssi == 0)
 	#define rssi_cal 1 
 	// Minimum RSSI-value. Will be voltage * 205. 0.5 volt = 103. You can set this to zero and just read the min value and max value
-	#define rssi_min 103
+	#define rssi_min 0//103
 #else
 	// Min/Max Values for rssi pwm duration, in this case for ezuhf signal quality. 
-	// values from https://github.com/AeroQuad/AeroQuad/blob/master/Libraries/AQ_RSSI/EzUHFRSSIReader.h
-	#define rssi_min 1614
-	#define rssi_max 2001
-	
+	#define rssi_min 1960
+	#define rssi_max 3600
 	// example values for rssi signal
 	//#define rssi_min 1001
 	//#define rssi_max 2000
@@ -117,7 +115,7 @@
 
 // Dimming can be turned off. Mainly for debugging
 // 1 = on, 0 = off
-#define dim_on 1
+#define dim_on 0
 
 // Show plane pos
 #define show_plane_pos_ 1
@@ -157,7 +155,7 @@
 //========================================================================
 
 
-#if (video_system == 0)
+#if (VIDEO_SYSTEM == 0)
 	// PAL
 	#define toplinetext 41
 	#define toplinenumbers 51
@@ -189,11 +187,11 @@
 	
 	#if (dim_on == 1)
 		// This is used for dimming. can be changed to another pin if you want.
-		#define DimOn() do { DDRB |= 0b00000001; }while (0)
-		#define DimOff() do {DDRB &= 0b11111110; }while (0)
+		#define DimOn()  DDRB |= 0b00000001
+		#define DimOff() DDRB &= 0b11111110
 	#else
-		#define DimOn() do { DDRB |= 0b00000000; }while (0)
-		#define DimOff() do {DDRB &= 0b11111111; }while (0)
+		#define DimOn() DDRB |= 0b00000000
+		#define DimOff() DDRB &= 0b11111111
 	#endif  
 	  
 	#define little_delay() do {} while (0)
@@ -212,17 +210,17 @@
 		// This is used for dimming. can be changed to another pin if you want. 
 		//define SimpleOSD OPEN's dim pin C5 ,  SimpleOSD X2's dim pin B1
 		//SimpleOSD OPEN XL
-		#define DimOn() do { DDRC |= 0b00100000; }while (0)
-		#define DimOff() do {DDRC &= 0b11011111; }while (0)
+		#define DimOn() DDRC |= 0b00100000
+		#define DimOff() DDRC &= 0b11011111
 	#else
-		#define DimOn() do { DDRB |= 0b00000000; }while (0)
-		#define DimOff() do {DDRB &= 0b11111111; }while (0)
+		#define DimOn() DDRB |= 0b00000000
+		#define DimOff() DDRB &= 0b11111111
 	#endif    
 	  
 	#define little_delay() _delay_loop_1(13) 
 
 // SimpleOSD X2 16 mhz
-#else     
+#else
 	// Input from current-sensor and voltage-divider
 	#define voltage_divider_input 0
 	#define current_sensor_input 1
@@ -236,36 +234,36 @@
 	#if (dim_on == 1)
 		// This is used for dimming. can be changed to another pin if you want. 
 		//define SimpleOSD X2's dim pin B1
-		#define DimOn() do { DDRB |= 0b00000010; }while (0)
-		#define DimOff() do {DDRB &= 0b11111101; }while (0)
+		#define DimOn() DDRB |= 0b00000010
+		#define DimOff() DDRB &= 0b11111101
 	#else
-		#define DimOn() do {DDRB |= 0b00000000; }while (0)
-		#define DimOff() do {DDRB &= 0b11111111; }while (0)
+		#define DimOn() DDRB |= 0b00000000
+		#define DimOff() DDRB &= 0b11111111
 	#endif
 	  
 	#define little_delay() _delay_loop_1(13)
 #endif
 
-#define mux_currentSens() do { ADMUX = (0<<MUX3) | (0<<MUX2) | (0<<MUX1) | (current_sensor_input<<MUX0) | (1<<REFS0) |(0<<REFS1); } while (0)
-#define mux_batVoltage() do { ADMUX = (0<<MUX3) | (0<<MUX2) | (0<<MUX1) | (voltage_divider_input<<MUX0) | (1<<REFS0) |(0<<REFS1); } while (0)
-#define mux_rssi() do { ADMUX = (0<<MUX3) | (0<<MUX2) | (0<<MUX1) | (rssi_input<<MUX0) | (1<<REFS0) |(0<<REFS1); } while (0)
+#define mux_currentSens() ADMUX = (0<<MUX3) | (0<<MUX2) | (0<<MUX1) | (current_sensor_input<<MUX0) | (1<<REFS0) |(0<<REFS1)
+#define mux_batVoltage() ADMUX = (0<<MUX3) | (0<<MUX2) | (0<<MUX1) | (voltage_divider_input<<MUX0) | (1<<REFS0) |(0<<REFS1)
+#define mux_rssi() ADMUX = (0<<MUX3) | (0<<MUX2) | (0<<MUX1) | (rssi_input<<MUX0) | (1<<REFS0) |(0<<REFS1)
 
 // Lets define some delays
-#define delay15() do { __asm__("nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t"); } while(0)
-#define delay14() do { __asm__("nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t"); } while(0)
-#define delay13() do { __asm__("nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t"); } while(0)
-#define delay12() do { __asm__("nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t"); } while(0)
-#define delay11() do { __asm__("nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t"); } while(0)
-#define delay10() do { __asm__("nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t"); } while(0)
-#define delay9() do {  __asm__("nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t"); } while(0)
-#define delay8() do {  __asm__("nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t"); } while(0)
-#define delay7() do {  __asm__("nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t"); } while(0)
-#define delay6() do {  __asm__("nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t"); } while(0)
-#define delay5() do {  __asm__("nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t"); } while(0)
-#define delay4() do {  __asm__("nop\n\t""nop\n\t""nop\n\t""nop\n\t"); } while(0)
-#define delay3() do {  __asm__("nop\n\t""nop\n\t""nop\n\t"); } while(0)
-#define delay2() do {  __asm__("nop\n\t""nop\n\t"); } while(0)
-#define delay1() do {  __asm__("nop\n\t"); } while(0)
+#define delay15()  __asm__("nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t")
+#define delay14()  __asm__("nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t")
+#define delay13()  __asm__("nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t")
+#define delay12()  __asm__("nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t")
+#define delay11()  __asm__("nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t")
+#define delay10()  __asm__("nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t")
+#define delay9()   __asm__("nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t")
+#define delay8()   __asm__("nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t")
+#define delay7()   __asm__("nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t")
+#define delay6()   __asm__("nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t")
+#define delay5()   __asm__("nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t")
+#define delay4()   __asm__("nop\n\t""nop\n\t""nop\n\t""nop\n\t")
+#define delay3()   __asm__("nop\n\t""nop\n\t""nop\n\t")
+#define delay2()   __asm__("nop\n\t""nop\n\t")
+#define delay1()   __asm__("nop\n\t")
 
 #define clock 16000000
 #define BAUD_SETTINGS clock/16/BAUD-1

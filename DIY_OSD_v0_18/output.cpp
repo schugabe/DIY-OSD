@@ -8,7 +8,6 @@
 #include "ascii.h"
 #include "output.h"
 #include "variables.h"
-#include "pwm.h"
 
 extern unsigned char align_text;
 extern unsigned char flight_timer[];
@@ -67,16 +66,15 @@ typedef enum { falling, rising } pwm_state_t;
 volatile static uint16_t rising_ticks, falling_ticks;
 volatile static pwm_state_t state;
 volatile static uint16_t duration = 0;
+volatile static uint16_t last = 0;
 
-#define SET_RISING()  TCCR1B |=  (1<<ICES1)
-#define SET_FALLING() TCCR1B &= ~(1<<ICES1)
+#define SET_RISING()  TCCR1B |=  (1<<ICES1); TIFR1 |= (1<<ICF1)
+#define SET_FALLING() TCCR1B &= ~(1<<ICES1); TIFR1 |= (1<<ICF1)
 
 void pwm_enable() {
 	state = rising;
-	rising_ticks = falling_ticks = 0;
+	rising_ticks = falling_ticks = duration = 0;
 	SET_RISING();
-	//clear any pending interrupt, wait for next rising edge
-	TIFR1 |= (1<<ICF1);
 	
 	//enable interrupt
 	TIMSK1 |= (1<<ICIE1);
@@ -112,13 +110,17 @@ ISR(TIMER1_CAPT_vect) {
 }
 
 unsigned char pwm_getPercentage(unsigned short min_v, unsigned short max_v) {
+        if (duration == 0)
+          return last;
 	uint32_t tmp = duration - min_v;
 	
 	tmp *= 100;
 	tmp /= (uint32_t)(max_v-min_v);
 	
 	if (tmp > 100)
-		tmp = 100;
+		tmp = last;
+        else
+                last = tmp;
 	
 	return tmp;
 }
@@ -126,11 +128,12 @@ unsigned char pwm_getPercentage(unsigned short min_v, unsigned short max_v) {
 // frame output
 
 void detectframe() {
-	line=0;
+  line=0;
 }
 
 void detectline() {
 	little_delay(); // This is used to adjust to timing when using SimpleOSD instead of Arduino
+        
 		////////////////////////////////////////////
 		// Flight timer and mah/km
 		////////////////////////////////////////////
@@ -1687,11 +1690,11 @@ void detectline() {
 				ADCtemp2=ADCH;
 				// Adding the high and low register;
 				rssi_reading=ADCtemp+(ADCtemp2<<8);
-				rssi_reading=(rssi_reading-rssi_min)*rssi_cal;
+				//rssi_reading=((rssi_reading-rssi_min)*rssi_cal);
+                                rssi_reading = 100-((int16_t)((rssi_reading-48)/(int16_t)2));
 				rssi_negative=0;
 				if (rssi_reading < 0) {
-					rssi_negative = 1;
-					rssi_reading=rssi_reading*(-1);
+					rssi_reading=0;
 				}
 			
 			#else 
@@ -1801,16 +1804,15 @@ void detectline() {
 			mahr[4]=((((mahtemp % 10000) % 1000) % 100) % 10)+3;
 			// Timing seems fine - just at the end of the line
 			//SPDR=0b11111100;
-			if (digital_rssi == 0) {
+			#if (digital_rssi == 0)
 				// Setup ADC to be used with RSSI
 				mux_rssi();
 				// Start the conversion (ADC)
 				ADCSRA|=(1<<ADSC);
-			}
-			else {
+			#else
 				// Capture the rssi pwm value
 				pwm_enable();
-			}
+			#endif
 		}
 	}
 	// ============================================================
