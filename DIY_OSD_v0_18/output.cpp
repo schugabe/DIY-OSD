@@ -65,11 +65,12 @@ typedef enum { falling, rising } pwm_state_t;
 
 volatile static uint16_t rising_ticks, falling_ticks;
 volatile static pwm_state_t state;
-volatile static uint16_t duration = 0;
-static uint16_t last = 0;
-static uint16_t invalid_count = 0;
+volatile static uint32_t duration = 0;
+#define MAX_DURATION  (rssi_max-rssi_min)
+
 #define SET_RISING()  TCCR1B |=  (1<<ICES1); TIFR1 |= (1<<ICF1)
 #define SET_FALLING() TCCR1B &= ~(1<<ICES1); TIFR1 |= (1<<ICF1)
+#define PWM_DISABLE() TIMSK1 &= ~(1<<ICIE1)
 
 void pwm_enable() {
 	state = rising;
@@ -83,7 +84,7 @@ void pwm_enable() {
 void pwm_disable() {
 	state = rising;
 	//disable interrupt
-	TIMSK1 &= ~(1<<ICIE1);
+	
 }
 
 // input capture interrupt
@@ -97,43 +98,14 @@ ISR(TIMER1_CAPT_vect) {
 	// if we are capturing falling edge store value and calculate duration
 	else if (state == falling) {
 		falling_ticks = ICR1;
-		state = rising;
-		
-		if (rising_ticks > falling_ticks)
-			duration = rising_ticks - falling_ticks;
-		else 
-			duration = falling_ticks - rising_ticks;
-		
 		// turn off capturing after first measurement
-		pwm_disable();
+		PWM_DISABLE();
+		
+		/*if (rising_ticks > falling_ticks)
+			duration = rising_ticks - falling_ticks;
+		else*/ 
+		duration = falling_ticks - rising_ticks;
 	}
-}
-
-char pwm_getPercentage(unsigned short min_v, unsigned short max_v) {
-	if (duration == 0) {
-		invalid_count++;
-		if (invalid_count > 50)
-			return -1;
-		return last;
-	}
-	
-	uint32_t tmp = duration - min_v;
-	
-	tmp *= 100;
-	tmp /= (uint32_t)(max_v-min_v);
-	
-	if (tmp > 100) {
-		tmp = last;
-		invalid_count++;
-		if (invalid_count > 50)
-			return -1;
-		else 
-			return last;
-	}
-	
-	last = tmp;
-	invalid_count = 0;
-	return tmp;
 }
 
 // frame output
@@ -162,10 +134,17 @@ void detectline() {
 			
 			if  (show_mah_km == 1 || show_rssi == 1) {
 				if (show_rssi == 1) {
-					mahkmr[0]=3;
-					mahkmr[1]=rssir[0];
-					mahkmr[2]=rssir[1];
-					mahkmr[3]=rssir[2];
+					#if (show_raw_rssi == 1)
+						mahkmr[0]=rssir[0];
+						mahkmr[1]=rssir[1];
+						mahkmr[2]=rssir[2];
+						mahkmr[3]=rssir[3];
+					#else
+						mahkmr[0]=3;
+						mahkmr[1]=rssir[0];
+						mahkmr[2]=rssir[1];
+						mahkmr[3]=rssir[2];
+					#endif
 				}
 				if (mahkmr[0]==3 && mahkmr[1]==3 && mahkmr[2]==3) {
 					mahkm_buf[0]=14<<5;
@@ -188,9 +167,9 @@ void detectline() {
 					mahkm_buf[2]=(mahkmr[2])<<5;
 					mahkm_buf[3]=(mahkmr[3])<<5;
 				}
-				if (rssi_negative==1 && show_rssi==1) {
+				/*if (rssi_negative==1 && show_rssi==1) {
 					mahkm_buf[0]=13<<5;
-				}
+				}*/
 			}
 			//SPDR = 0b11111110;
 		} else {
@@ -1702,23 +1681,31 @@ void detectline() {
 				// Adding the high and low register;
 				rssi_reading=ADCtemp+(ADCtemp2<<8);
 				//rssi_reading=((rssi_reading-rssi_min)*rssi_cal);
-				rssi_reading = 100-((int16_t)((rssi_reading-48)/(int16_t)2));
-				rssi_negative=0;
-				if (rssi_reading < 0) {
-					rssi_reading=0;
-				}
+				
+				#if (show_raw_rssi == 0)
+					rssi_reading = 100-((int16_t)((rssi_reading-48)/(int16_t)2));
+					rssi_negative=0;
+					if (rssi_reading < 0) {
+						rssi_reading = 0;
+					}
+				#endif
 			
-			#else 
-				rssi_reading = pwm_getPercentage(rssi_min,rssi_max);
-				if (rssi_reading < 0) {
-					rssi_negative = 1;
-					rssi_reading *= -1;
-				}
+			#else					
+				#if (show_raw_rssi == 1)
+					rssi_reading = duration;
+					rssir[0]=(  rssi_reading/1000)+3;
+					rssir[1]=(( rssi_reading%1000)/100)+3;      
+					rssir[2]=(((rssi_reading%1000)%100)/10)+3; 
+					rssir[3]=(((rssi_reading%1000)%100)%10)+3;
+				#else
+					if (duration != 0 && duration <= rssi_max && duration >= rssi_min) {
+						rssi_reading = (uint16_t)(((uint32_t)((duration - rssi_min)*100))/(uint32_t)(MAX_DURATION));
+						rssir[0]= (rssi_reading / 100)+3;
+						rssir[1]= ((rssi_reading % 100) / 10)+3;
+						rssir[2]= ((rssi_reading % 100) % 10)+3;
+					}	
+				#endif
 			#endif
-			
-			rssir[0]= (rssi_reading / 100)+3;
-			rssir[1]= ((rssi_reading % 100) / 10)+3;
-			rssir[2]= ((rssi_reading % 100) % 10)+3;
 		}
 		if (loopcount == 1) {
 			// Setup ADC to be used with current sensor
@@ -1824,14 +1811,11 @@ void detectline() {
 				mux_rssi();
 				// Start the conversion (ADC)
 				ADCSRA|=(1<<ADSC);
-			//#else
+			#else
 				// Capture the rssi pwm value
-				
-			//#endif
+				pwm_enable();
+			#endif
 		}
-		#if (digital_rssi == 1)
-			pwm_enable();
-		#endif
 	}
 	// ============================================================
 	// Current sensor END

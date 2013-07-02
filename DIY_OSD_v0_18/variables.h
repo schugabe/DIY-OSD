@@ -63,8 +63,8 @@ unsigned char showcoordinates=1;
 
 int rssi_reading=0;
 unsigned char rssir[]={
-  3,3,3};
-unsigned char rssi_negative =0;
+  3,3,3,3};
+unsigned char rssi_negative = 0;
 
 // Numbers and letters
 #endif

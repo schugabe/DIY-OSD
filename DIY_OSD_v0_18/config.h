@@ -80,20 +80,19 @@
 */
 
 // RSSI setup. Please note, when RSSI is active it will replace mah/km.
-#define digital_rssi 1 // 1=on, 0 = off
-#define show_rssi 1 // 1= on, 0 = off
+#define digital_rssi 1 	// 1 = on, 0 = off
+#define show_rssi 1 	// 1 = on, 0 = off
+#define show_raw_rssi 0 // 1= on, 0 = off
 
 #if (digital_rssi == 0)
 	#define rssi_cal 1 
 	// Minimum RSSI-value. Will be voltage * 205. 0.5 volt = 103. You can set this to zero and just read the min value and max value
 	#define rssi_min 0//103
 #else
-	// Min/Max Values for rssi pwm duration, in this case for ezuhf signal quality. 
-	#define rssi_min 1960
-	#define rssi_max 3600
-	// example values for rssi signal
-	//#define rssi_min 1001
-	//#define rssi_max 2000
+	// Min/Max Values for rssi pwm duration, in this case for ezuhf signal quality.
+        // example values for rssi signal, enable show_raw_rssi to find out min/max values here
+	#define rssi_min 1966
+	#define rssi_max 3568
 #endif
 
 // I was asked to make a calculation on mah/km - this can be useful to find the most efficient cruise-speed etc.
