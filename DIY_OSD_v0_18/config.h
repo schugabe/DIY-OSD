@@ -233,6 +233,8 @@
 	#if (dim_on == 1)
 		// This is used for dimming. can be changed to another pin if you want. 
 		//define SimpleOSD X2's dim pin B1
+		//#define DimOn() DDRB |= 0b00000001
+		//#define DimOff() DDRB &= 0b11111110
 		#define DimOn() DDRB |= 0b00000010
 		#define DimOff() DDRB &= 0b11111101
 	#else

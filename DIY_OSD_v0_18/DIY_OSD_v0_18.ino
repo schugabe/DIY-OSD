@@ -29,7 +29,7 @@ extern int line;
 void setup() {
 	// Set pin-modes:
 	pinMode(10,OUTPUT);
-	pinMode(11,OUTPUT);  
+	pinMode(11,OUTPUT); 
 	pinMode(12,OUTPUT);
 	pinMode(13,OUTPUT);
 
@@ -41,15 +41,14 @@ void setup() {
 	pinMode(5,INPUT);
 	pinMode(6,INPUT); 
 	pinMode(7,INPUT);
-	pinMode(8,INPUT);  
+	pinMode(8,INPUT);
 
 	//Define SimpleOSD X2 dim pin
-#if (CONTROLLER == 2) 
-	pinMode(9,OUTPUT);
-#else
-	pinMode(9,INPUT);
-#endif
-
+	#if (CONTROLLER == 2) 
+		pinMode(9,OUTPUT);
+	#else
+		pinMode(9,INPUT);
+	#endif
 
 	// Init Serial communication. 
 	Serial.begin(BAUD);
@@ -84,7 +83,7 @@ void setup() {
 	SPDR =0b00000000; // IMPORTANT.. The SPI will idle random at low or high in the beginning. If it idles high you will get black screen = bad idea in FPV.
 	// It will always idle at the last bit sent, so always be sure the last bit is 0. The main-loop and end of each line will always send 8 zeros - so it should
 	// be pretty safe. 
-  
+ 
 	// Analog read enable and set prescale. You can change prescale if you like.
 	ADCSRA = (1<<ADEN) | (1<<ADPS2) | (0<<ADPS1) | (1<<ADPS0);
   
@@ -125,21 +124,22 @@ void setup() {
 		attachInterrupt(1,detectframe,RISING);  
 		pinMode(13,OUTPUT);
 		digitalWrite(13,HIGH); // Turn on the led
-
-                // enable pwm rssi input
-                #if (digital_rssi==1)
-		  pinMode(RSSI_INPUT_PIN,INPUT); 
-		  digitalWrite(RSSI_INPUT_PIN,HIGH);  
-    
-		  // nothing needed here
-		  TCCR1A = (0<<WGM10) | (0<<WGM11) | (0<<COM1A1) | (0<<COM1A0) | (0<<COM1B1) | (0<<COM1B0);
-	
-		  // set input capture rising, prescaler 8
-		  TCCR1B = (1<<ICNC1) | (1<<ICES1) | (0<<CS10) | (1<<CS11) | (0<<CS12) | (0<<WGM13)| (0<<WGM12);
- 
-	 	  // turn off output compare
-		  TCCR1C = (0<<FOC1A) | (0<<FOC1B);
-                #endif
+		
+		//debug dim pin
+		//pinMode(8,OUTPUT); 
+		//digitalWrite(8,LOW);
+		
+		// enable pwm rssi input
+		#if (digital_rssi==1)
+			pinMode(RSSI_INPUT_PIN,INPUT); 
+			digitalWrite(RSSI_INPUT_PIN,HIGH);  
+			// nothing needed here
+			TCCR1A = (0<<WGM10) | (0<<WGM11) | (0<<COM1A1) | (0<<COM1A0) | (0<<COM1B1) | (0<<COM1B0);
+			// set input capture rising, prescaler 8
+			TCCR1B = (1<<ICNC1) | (1<<ICES1) | (0<<CS10) | (1<<CS11) | (0<<CS12) | (0<<WGM13)| (0<<WGM12);
+ 			// turn off output compare
+			TCCR1C = (0<<FOC1A) | (0<<FOC1B);
+      #endif
 	}
 	
 	// Button with internal pull-up.  

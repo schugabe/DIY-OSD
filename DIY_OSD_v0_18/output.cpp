@@ -59,7 +59,7 @@ extern unsigned char speedkmw[5];
 extern unsigned char altitude2[10];
 extern unsigned char altituder[10];
 
-
+#if (digital_rssi==1)
 // RSSI PWM Input
 typedef enum { falling, rising } pwm_state_t;
 
@@ -107,16 +107,15 @@ ISR(TIMER1_CAPT_vect) {
 		duration = falling_ticks - rising_ticks;
 	}
 }
+#endif
 
 // frame output
-
 void detectframe() {
   line=0;
 }
 
-void detectline() {
-	little_delay(); // This is used to adjust to timing when using SimpleOSD instead of Arduino
-        
+void detectline() {     
+	little_delay(); // This is used to adjust to timing when using SimpleOSD instead of Arduino   
 		////////////////////////////////////////////
 		// Flight timer and mah/km
 		////////////////////////////////////////////
@@ -167,9 +166,9 @@ void detectline() {
 					mahkm_buf[2]=(mahkmr[2])<<5;
 					mahkm_buf[3]=(mahkmr[3])<<5;
 				}
-				/*if (rssi_negative==1 && show_rssi==1) {
-					mahkm_buf[0]=13<<5;
-				}*/
+				//if (rssi_negative==1 && show_rssi==1) {
+				//	mahkm_buf[0]=13<<5;
+				//}
 			}
 			//SPDR = 0b11111110;
 		} else {
@@ -1681,7 +1680,6 @@ void detectline() {
 				// Adding the high and low register;
 				rssi_reading=ADCtemp+(ADCtemp2<<8);
 				//rssi_reading=((rssi_reading-rssi_min)*rssi_cal);
-				
 				#if (show_raw_rssi == 0)
 					rssi_reading = 100-((int16_t)((rssi_reading-48)/(int16_t)2));
 					rssi_negative=0;
