@@ -1,6 +1,6 @@
 #include "Arduino.h"
 
-#include <avr/delay.h>
+#include <util/delay.h>
 #include <avr/pgmspace.h>
 #include <EEPROM.h>
 
@@ -109,12 +109,33 @@ ISR(TIMER1_CAPT_vect) {
 }
 #endif
 
+/*volatile uint16_t last_start = 0;
+volatile uint8_t output_enable = 0;
+volatile uint16_t last_line_start = 0;*/
+
 // frame output
 void detectframe() {
-  line=0;
+	/*int32_t frame_duration = TCNT1-last_start;
+	last_start = TCNT1;
+	if (frame_duration < 0)
+		frame_duration += 0xffff;
+	if (frame_duration < 240)
+  	  output_enable = 1;
+	else
+	  output_enable = 0;*/
+	line = 0;
 }
 
+
+
 void detectline() {     
+	/*int32_t line_duration = TCNT1-last_line_start;
+	last_line_start = TCNT1;
+	if (line_duration < 0)
+	  line_duration += 0xffff;
+	
+	if (!output_enable || line_duration <= 14)
+          return;*/
 	little_delay(); // This is used to adjust to timing when using SimpleOSD instead of Arduino   
 		////////////////////////////////////////////
 		// Flight timer and mah/km
@@ -640,7 +661,7 @@ void detectline() {
 						_delay_loop_1(40);
 						if (menupos == 1) {
 							SPDR = 0b11111100;
-							numbers[0+(temp)];
+							//numbers[0+(temp)];
 							_delay_loop_1(3);
 						} else {
 							SPDR = 0b00000000;
@@ -1446,7 +1467,7 @@ void detectline() {
 		// Used to align the text
 		_delay_loop_1(align_text);
 		if (line == (gps_nmea_line+1)) {
-			if (altitude_num2 < show_gps_coordinates_altitude*10  | flight_timer[3] % show_gps_coordinates_second == 0) {
+			if (altitude_num2 < show_gps_coordinates_altitude*10  || flight_timer[3] % show_gps_coordinates_second == 0) {
 				// _delay_loop_1(22);
 				showcoordinates=1;
 			} else {
@@ -1686,6 +1707,14 @@ void detectline() {
 					if (rssi_reading < 0) {
 						rssi_reading = 0;
 					}
+                                        rssir[0]= (rssi_reading / 100)+3;
+					rssir[1]= ((rssi_reading % 100) / 10)+3;
+					rssir[2]= ((rssi_reading % 100) % 10)+3;
+                                #else
+                                  rssir[0]=(  rssi_reading/1000)+3;
+				  rssir[1]=(( rssi_reading%1000)/100)+3;      
+				  rssir[2]=(((rssi_reading%1000)%100)/10)+3; 
+				  rssir[3]=(((rssi_reading%1000)%100)%10)+3;
 				#endif
 			
 			#else					

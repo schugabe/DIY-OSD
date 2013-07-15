@@ -3,7 +3,7 @@
 
 #include "Arduino.h"
 
-#include <avr/delay.h>
+#include <util/delay.h>
 #include <avr/pgmspace.h>
 #include <EEPROM.h>
 
@@ -168,7 +168,7 @@ unsigned int mahkm =0;
 unsigned char mahkmr[]={3,3,3,3,3,3};
 
 void gps() {
-	if (CONTROLLER == 1 || Usebutton == 1) {
+	/*if (CONTROLLER == 1 || Usebutton == 1) {
 		if (digitalRead(Buttonpin)==LOW) {
     
 			GPSbuffer[0]=((alt_alarm/1000)+3)<<3;
@@ -202,7 +202,7 @@ void gps() {
 						}
 					}
       
-					if (menupos == 7 & menu == 1) {
+					if (menupos == 7 && menu == 1) {
 						menuon=0; 
 
 						// Show_mah_km
@@ -236,12 +236,12 @@ void gps() {
   
 					}
       
-					if (menupos == 6 & menu == 1) {
+					if (menupos == 6 && menu == 1) {
 						menu=2; 
         
 					}
       
-					else if (menupos == 1 & menu == 1) {
+					else if (menupos == 1 && menu == 1) {
 						if (show_mah_km== 1) {
 							show_mah_km =0;
 						}
@@ -252,7 +252,7 @@ void gps() {
 					}
         
 
-					else if (menupos == 2 & menu == 1) {
+					else if (menupos == 2 && menu == 1) {
 						if (show_decimals== 1) {
 							show_decimals =0;
 						}
@@ -264,7 +264,7 @@ void gps() {
 
 
 
-					else if (menupos == 3 & menu == 1) {
+					else if (menupos == 3 && menu == 1) {
 						if (altitude_offset_on == 1) {
 							altitude_offset_on  =0;
 						}
@@ -275,7 +275,7 @@ void gps() {
 					}
 
 
-					else if (menupos == 4 & menu == 1) {
+					else if (menupos == 4 && menu == 1) {
 						align_text++;
         
 						if (align_text > 40) {
@@ -285,7 +285,7 @@ void gps() {
 					}
         
 
-					else if (menupos == 5 & menu == 1) {
+					else if (menupos == 5 && menu == 1) {
 						if (show_plane_pos == 1) {
 							show_plane_pos  =0;
 						}
@@ -299,7 +299,7 @@ void gps() {
         
         
         
-					else if (menupos == 1 & menu == 2) {
+					else if (menupos == 1 && menu == 2) {
 						alt_alarm=alt_alarm+50;
             
 						if (alt_alarm > 2500) {
@@ -315,7 +315,7 @@ void gps() {
 					}        
         
         
-					else if (menupos == 2 & menu == 2) {
+					else if (menupos == 2 && menu == 2) {
 						los_alarm=los_alarm+50;
             
 						if (los_alarm > 2500) {
@@ -330,7 +330,7 @@ void gps() {
 					}         
         
         
-					else if (menupos == 3 & menu == 2) {
+					else if (menupos == 3 && menu == 2) {
 						volt_alarm=volt_alarm+1;
             
 						if (volt_alarm > 200) {
@@ -344,7 +344,7 @@ void gps() {
           
 					}    
 
-					else if (menupos == 4 & menu == 2) {
+					else if (menupos == 4 && menu == 2) {
 						mah_alarm=mah_alarm+100;
             
 						if (mah_alarm > 5000) {
@@ -358,18 +358,18 @@ void gps() {
           
 					}            
         
-					else if (menupos == 5 & menu == 2) {
+					else if (menupos == 5 && menu == 2) {
 						menu=1; 
 					}        
 				}
 			}
 		}
-	}
+	}*/
 
 	while (1==1) {
     
 		SPDR =0b00000000;
-		if (UCSR0A & (1<<RXC0)) {
+		if (UCSR0A && (1<<RXC0)) {
 			GPSbuffer[bufnr] = UDR0;
 
 			bufnr++;
@@ -648,7 +648,7 @@ void gps() {
 					//===================================================      
 					// Flight summary
 					//===================================================  
-					if (speedkm > max_speed) {
+					if (speedkm > (unsigned int)max_speed) {
 						max_speed = speedkm;
       
 						max_speedr[0]=(  max_speed/1000)+3;

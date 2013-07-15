@@ -80,9 +80,9 @@
 */
 
 // RSSI setup. Please note, when RSSI is active it will replace mah/km.
-#define digital_rssi 1 	// 1 = on, 0 = off
+#define digital_rssi 0 	// 1 = on, 0 = off
 #define show_rssi 1 	// 1 = on, 0 = off
-#define show_raw_rssi 0 // 1= on, 0 = off
+#define show_raw_rssi 1 // 1= on, 0 = off
 
 #if (digital_rssi == 0)
 	#define rssi_cal 1 
@@ -127,7 +127,7 @@
 // From version 15 settings can be saved. This means, that even when updating software or reloading firmware settings will remain
 // If you want to load the settings from this code, please change this value to 1, upload the code, change the value to 0 and upload again.
 // 1 = reset/reload values, 0 = don't reload values. 
-#define reset_values 0
+#define reset_values 1
 
 // From software version 15 a menu can be used for configuration. You only need a single button. If no button is used, menu should be turned off.
 // It will always be on if controller 1 (SimpleOSD OPEN have been choosen)
@@ -267,6 +267,6 @@
 #define delay1()   __asm__("nop\n\t")
 
 #define clock 16000000
-#define BAUD_SETTINGS clock/16/BAUD-1
+#define BAUD_SETTINGS (clock/16/BAUD-1)
 
 #endif

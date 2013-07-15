@@ -20,7 +20,7 @@
 #include "gps.h"
 
 
-#include <avr/delay.h>
+#include <util/delay.h>
 #include <avr/pgmspace.h>
 #include <EEPROM.h>
 
@@ -129,17 +129,20 @@ void setup() {
 		//pinMode(8,OUTPUT); 
 		//digitalWrite(8,LOW);
 		
+		// nothing needed here
+		TCCR1A = (0<<WGM10) | (0<<WGM11) | (0<<COM1A1) | (0<<COM1A0) | (0<<COM1B1) | (0<<COM1B0);
+		//  prescaler 8
+		TCCR1B = (0<<CS10) | (1<<CS11) | (0<<CS12) | (0<<WGM13)| (0<<WGM12);
+		// turn off output compare
+		TCCR1C = (0<<FOC1A) | (0<<FOC1B);
+		
 		// enable pwm rssi input
 		#if (digital_rssi==1)
 			pinMode(RSSI_INPUT_PIN,INPUT); 
-			digitalWrite(RSSI_INPUT_PIN,HIGH);  
-			// nothing needed here
-			TCCR1A = (0<<WGM10) | (0<<WGM11) | (0<<COM1A1) | (0<<COM1A0) | (0<<COM1B1) | (0<<COM1B0);
-			// set input capture rising, prescaler 8
-			TCCR1B = (1<<ICNC1) | (1<<ICES1) | (0<<CS10) | (1<<CS11) | (0<<CS12) | (0<<WGM13)| (0<<WGM12);
- 			// turn off output compare
-			TCCR1C = (0<<FOC1A) | (0<<FOC1B);
-      #endif
+			digitalWrite(RSSI_INPUT_PIN,HIGH);
+			// set input capture rising
+			TCCR1B |= (1<<ICNC1) | (1<<ICES1);	
+		#endif
 	}
 	
 	// Button with internal pull-up.  
@@ -187,6 +190,7 @@ void setup() {
 // ====================================================================================================================================================================================================================
 // ====================================================================================================================================================================================================================
 // Analog comparator interrupt:
+#if (CONTROLLER == 0)
 ISR(ANALOG_COMP_vect) {
 	// Reset counter
 	TCNT2 =0; 
@@ -203,7 +207,7 @@ ISR(ANALOG_COMP_vect) {
   
 	detectline(); 
 }
-
+#endif
 
 // ====================================================================================================================================================================================================================
 // ====================================================================================================================================================================================================================
