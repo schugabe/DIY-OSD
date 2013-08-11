@@ -369,7 +369,7 @@ void gps() {
 	while (1==1) {
     
 		SPDR =0b00000000;
-		if (UCSR0A && (1<<RXC0)) {
+		if (UCSR0A & (1<<RXC0)) {
 			GPSbuffer[bufnr] = UDR0;
 
 			bufnr++;

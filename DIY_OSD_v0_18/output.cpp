@@ -109,39 +109,18 @@ ISR(TIMER1_CAPT_vect) {
 }
 #endif
 
-/*volatile uint16_t last_start = 0;
-volatile uint8_t output_enable = 0;
-volatile uint16_t last_line_start = 0;*/
-
 // frame output
 void detectframe() {
-	/*int32_t frame_duration = TCNT1-last_start;
-	last_start = TCNT1;
-	if (frame_duration < 0)
-		frame_duration += 0xffff;
-	if (frame_duration < 240)
-  	  output_enable = 1;
-	else
-	  output_enable = 0;*/
 	line = 0;
 }
 
-
-
 void detectline() {     
-	/*int32_t line_duration = TCNT1-last_line_start;
-	last_line_start = TCNT1;
-	if (line_duration < 0)
-	  line_duration += 0xffff;
-	
-	if (!output_enable || line_duration <= 14)
-          return;*/
 	little_delay(); // This is used to adjust to timing when using SimpleOSD instead of Arduino   
 		////////////////////////////////////////////
 		// Flight timer and mah/km
 		////////////////////////////////////////////
-
-	if (line > timer_line  && line < (timer_line +17)) {
+        
+	if (line > timer_line  && line < (timer_line +font_lines_count)) {
 		// Used to align the text
 		_delay_loop_1(align_text);
 		temp = line - (timer_line +1);
@@ -269,7 +248,7 @@ void detectline() {
 	////////////////////////////////////////////
 	// Top line big numbers
 	////////////////////////////////////////////
-	else if (line > toplinenumbers  && line < (toplinenumbers +17)) {
+	else if (line > toplinenumbers  && line < (toplinenumbers +font_lines_count)) {
 		// Used to align the text
 		_delay_loop_1(align_text);
 		_delay_loop_1(1);
@@ -455,7 +434,7 @@ void detectline() {
 	////////////////////////////////////////////
 	// Buttom line big numbers
 	////////////////////////////////////////////
-	else if (line > butlinenumbers && line < (butlinenumbers +17)) {
+	else if (line > butlinenumbers && line < (butlinenumbers +font_lines_count)) {
 		// Used to align the text
 		_delay_loop_1(align_text);
 		temp = line - (butlinenumbers +1);
@@ -1159,7 +1138,7 @@ void detectline() {
 				buffer[6]=('N'-64)<<3;
 				buffer[7]=(0+3)<<3;
 				buffer[8]=(1+3)<<3;
-				buffer[9]=(8+3)<<3;
+				buffer[9]=(9+3)<<3;
 				DimOn();
 				for (unsigned char ij=0; ij<7; ij++) {
 					SPDR=letters[buffer[ij]+(temp)];
@@ -1700,7 +1679,7 @@ void detectline() {
 				ADCtemp2=ADCH;
 				// Adding the high and low register;
 				rssi_reading=ADCtemp+(ADCtemp2<<8);
-				//rssi_reading=((rssi_reading-rssi_min)*rssi_cal);
+                                //rssi_reading=((rssi_reading-rssi_min)*rssi_cal);
 				#if (show_raw_rssi == 0)
 					rssi_reading = 100-((int16_t)((rssi_reading-48)/(int16_t)2));
 					rssi_negative=0;
@@ -1726,7 +1705,9 @@ void detectline() {
 					rssir[3]=(((rssi_reading%1000)%100)%10)+3;
 				#else
 					if (duration != 0 && duration <= rssi_max && duration >= rssi_min) {
-						rssi_reading = (uint16_t)(((uint32_t)((duration - rssi_min)*100))/(uint32_t)(MAX_DURATION));
+						//rssi_reading = (uint16_t)(((uint32_t)((duration - rssi_min)*100))/(uint32_t)(MAX_DURATION));
+rssi_reading = last_maxline;
+last_maxline = 0;
 						rssir[0]= (rssi_reading / 100)+3;
 						rssir[1]= ((rssi_reading % 100) / 10)+3;
 						rssir[2]= ((rssi_reading % 100) % 10)+3;

@@ -17,7 +17,7 @@
 //===========================
 // Pal = 0, NTSC = 1
 #define VIDEO_SYSTEM 1
-
+#define large_font 0
 
 //=============================================================================================
 // Setup
@@ -51,13 +51,14 @@
 
 // Delay when setting home position. When GPS have GPS-fix the homeposition will automatically be set. For better accuracy a delay can be added. The delay is defined as GPS update-rate / value set.
 // Example: 5 hz GPS with 25 delay will give 5 hz / 25 delay = 5 seconds delay.
-#define set_home_delay 50
+#define set_home_delay 25
 
 // Align text. On different screens/video signals I have seen, that the text is not alligned perfectly. Decreasing the number will move all text left, increasing the number will move it right.
 // Smallest number allowed is 1
 // Please be aware - no limits have been made, so you can move the entire text as much as you want. If you push the text "over the edge" (when you can't see it anymore) this will cause the text 
 // to interrupt with the "new line sync". You can give it a try to see what it does - but I deffinately recommend to keep the text on the screen when flying :) 
 #define align_text_ 22
+
 
 // Depending on your model (plane/heli/car) it can be necessary to edit these parameters to show flight-summary only when landed. To disable it, just put for example 0 in speed. The speed will never be less than 0. 
 
@@ -81,8 +82,8 @@
 
 // RSSI setup. Please note, when RSSI is active it will replace mah/km.
 #define digital_rssi 0 	// 1 = on, 0 = off
-#define show_rssi 1 	// 1 = on, 0 = off
-#define show_raw_rssi 1 // 1= on, 0 = off
+#define show_rssi 0 	// 1 = on, 0 = off
+#define show_raw_rssi 0 // 1= on, 0 = off
 
 #if (digital_rssi == 0)
 	#define rssi_cal 1 
@@ -114,10 +115,10 @@
 
 // Dimming can be turned off. Mainly for debugging
 // 1 = on, 0 = off
-#define dim_on 0
+#define dim_on 1
 
 // Show plane pos
-#define show_plane_pos_ 1
+#define show_plane_pos_ 0
 
 // Units. Meters and km/hr, or feet and miles
 // 1 = meters, 0 = feet
@@ -132,22 +133,22 @@
 // From software version 15 a menu can be used for configuration. You only need a single button. If no button is used, menu should be turned off.
 // It will always be on if controller 1 (SimpleOSD OPEN have been choosen)
 // 1 = on, 0 = off:
-#define Usebutton 1
+#define Usebutton 0
 
 //======================================================
 // Set alarms. Will blink when value is exceeded
 //======================================================
 // Voltage alarm (voltage will blink if it drops below the given value). To avoid decimal, use a factor 10 higher value, meaning 10 volt = 100, 8 Volt = 80 etc. 
-#define volt_alarm_ 100 // 100 = 10 volt
+#define volt_alarm_ 72 // 100 = 10 volt
 
 // mah alarm. mah will blink if it exceeds the defined value. Should be written in mah, meaning 2000 mah = 2000. 
-#define mah_alarm_ 2000
+#define mah_alarm_ 2600
 
 // los alarm. los-number will blink if it exceeds the defined value. Should be written in meter, meaning 2000 meter = 2000, 4 km = 4000 etc. 
 #define los_alarm_ 2000
 
 // Altitude alarm. altitude-number will blink if it exceeds the defined value. Should be written in meter, meaning 2000 meter = 2000, 4 km = 4000 etc. 
-#define alt_alarm_ 1100
+#define alt_alarm_ 120
 
 //========================================================================
 // END SETUP
@@ -156,13 +157,13 @@
 
 #if (VIDEO_SYSTEM == 0)
 	// PAL
-	#define toplinetext 41
-	#define toplinenumbers 51
-	#define butlinenumbers 271
-	#define timer_line 252
-	#define gps_nmea_line 32
-	#define summaryline 102
-	#define current_calc_line 292
+  #define toplinetext 41
+  #define toplinenumbers 51
+  #define butlinenumbers 271
+  #define timer_line 252
+  #define gps_nmea_line 32
+  #define summaryline 102
+  #define current_calc_line 292
 #else 
 	//NTSC
 	#define toplinetext 24
@@ -221,21 +222,20 @@
 // SimpleOSD X2 16 mhz
 #else
 	// Input from current-sensor and voltage-divider
-	#define voltage_divider_input 0
+	#define voltage_divider_input 2
 	#define current_sensor_input 1
-	#define rssi_input 2 // The input pin for analog rssi is adc2 (PC2 or AN2 on scematic)
+	#define rssi_input 3 // The input pin for analog rssi is adc2 (PC2 or AN2 on scematic)
 
 	// Button is connected to:
 	#define Buttonpin_ 6
 	
 	#define RSSI_INPUT_PIN 8
- 
-	#if (dim_on == 1)
+        #define dim_pin 9
+	
+        #if (dim_on == 1)
 		// This is used for dimming. can be changed to another pin if you want. 
 		//define SimpleOSD X2's dim pin B1
-		//#define DimOn() DDRB |= 0b00000001
-		//#define DimOff() DDRB &= 0b11111110
-		#define DimOn() DDRB |= 0b00000010
+		#define DimOn()  DDRB |= 0b00000010
 		#define DimOff() DDRB &= 0b11111101
 	#else
 		#define DimOn() DDRB |= 0b00000000
