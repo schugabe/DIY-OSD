@@ -17,7 +17,7 @@
 //===========================
 // Pal = 0, NTSC = 1
 #define VIDEO_SYSTEM 1
-#define large_font 0
+#define large_font 1
 
 //=============================================================================================
 // Setup
@@ -29,7 +29,7 @@
 // Current-sensor
 #define offset_ 0
 #define current_cal 0.49 
-// These values should more or less be correct. Feel free to make a calibration (a few measurements and a linear approksimation) if you feel like it. 
+// These values should more or less be correct. Feel free to make a calibration (a few measurements and a linear approximation) if you feel like it. 
 // 25 A sensor = 0.24
 // 50 A sensor = 0.49
 // 100A sensor = 0.98
@@ -39,10 +39,10 @@
 // Our microcontroller will have 0 v = 0 and 5 volt = 1024. This means 5 A (1 volt) will show as 1024 / 5 = 205
 // We want to show the amps as xx.x A - but we don't want decimals, so we will keep it a factor 10 higher.
 // The calibration should then be 205 * x = 50 A (in theory 5 A, but remember the factor 10). This gives 50/205 = 0.24
-// You can also take measurements and make a linear approksimatioin in excel etc - a quick test gave me more or less the same result...
+// You can also take measurements and make a linear approximation in excel etc - a quick test gave me more or less the same result...
 
 // Voltage divider
-#define voltage_divider_cal 1.82          // For SimpleOSD, I have used 1.82 - the formula gives 1.86. Test with a multimeter 
+#define voltage_divider_cal 1.86         // For SimpleOSD, I have used 1.82 - the formula gives 1.86. Test with a multimeter 
 // Calculated by (1024)/(50*divider) 
 
 //Altitude offset (automatic set to 0 when home-position is set)
@@ -81,9 +81,9 @@
 */
 
 // RSSI setup. Please note, when RSSI is active it will replace mah/km.
-#define digital_rssi 0 	// 1 = on, 0 = off
-#define show_rssi 0 	// 1 = on, 0 = off
-#define show_raw_rssi 0 // 1= on, 0 = off
+#define digital_rssi 1 	// 1 = on, 0 = off
+#define show_rssi 1	// 1 = on, 0 = off
+#define show_raw_rssi 1 // 1= on, 0 = off
 
 #if (digital_rssi == 0)
 	#define rssi_cal 1 
@@ -102,9 +102,9 @@
 //1 = on, 0=off.
 #define show_mah_km_ 1
 
-// For a cleaner look it's possible to remove decimals from speed and altitude. Speeds < 10 km/h will still show with decimals (can be changed if you wan't). 
+// For a cleaner look it's possible to remove decimals from speed and altitude. Speeds < 10 km/h will still show with decimals (can be changed if you want). 
 //1 = on, 0=off.
-#define show_decimals_ 1
+#define show_decimals_ 0
 
 // Hide GPS-coordinates when altitude is more than x meter
 #define show_gps_coordinates_altitude 500
@@ -115,7 +115,7 @@
 
 // Dimming can be turned off. Mainly for debugging
 // 1 = on, 0 = off
-#define dim_on 1
+#define dim_on 0
 
 // Show plane pos
 #define show_plane_pos_ 0
@@ -230,9 +230,9 @@
 	#define Buttonpin_ 6
 	
 	#define RSSI_INPUT_PIN 8
-        #define dim_pin 9
-	
-        #if (dim_on == 1)
+    #define dim_pin 9
+
+	#if (dim_on == 1)
 		// This is used for dimming. can be changed to another pin if you want. 
 		//define SimpleOSD X2's dim pin B1
 		#define DimOn()  DDRB |= 0b00000010

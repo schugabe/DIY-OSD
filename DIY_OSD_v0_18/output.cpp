@@ -63,7 +63,7 @@ extern unsigned char altituder[10];
 // RSSI PWM Input
 typedef enum { falling, rising } pwm_state_t;
 
-volatile static uint16_t rising_ticks, falling_ticks;
+volatile static uint16_t rising_ticks , falling_ticks;
 volatile static pwm_state_t state;
 volatile static uint32_t duration = 0;
 #define MAX_DURATION  (rssi_max-rssi_min)
@@ -74,18 +74,13 @@ volatile static uint32_t duration = 0;
 
 void pwm_enable() {
 	state = rising;
-	rising_ticks = falling_ticks = duration = 0;
+	rising_ticks = falling_ticks = 0;
 	SET_RISING();
 	
 	//enable interrupt
 	TIMSK1 |= (1<<ICIE1);
 }
 
-void pwm_disable() {
-	state = rising;
-	//disable interrupt
-	
-}
 
 // input capture interrupt
 ISR(TIMER1_CAPT_vect) {
@@ -98,13 +93,13 @@ ISR(TIMER1_CAPT_vect) {
 	// if we are capturing falling edge store value and calculate duration
 	else if (state == falling) {
 		falling_ticks = ICR1;
-		// turn off capturing after first measurement
+
 		PWM_DISABLE();
-		
-		/*if (rising_ticks > falling_ticks)
+
+		if (rising_ticks > falling_ticks)
 			duration = rising_ticks - falling_ticks;
-		else*/ 
-		duration = falling_ticks - rising_ticks;
+		else
+			duration = falling_ticks - rising_ticks;
 	}
 }
 #endif
@@ -114,7 +109,7 @@ void detectframe() {
 	line = 0;
 }
 
-void detectline() {     
+void detectline() {
 	little_delay(); // This is used to adjust to timing when using SimpleOSD instead of Arduino   
 		////////////////////////////////////////////
 		// Flight timer and mah/km
@@ -362,13 +357,11 @@ void detectline() {
 			DimOff();
 			// Writes ALT
 			if (show_decimals == 1) {
-				//              _delay_loop_1(13);
 				if (buffer3[9] !=448) {
 					SPDR = LargeNumbers[buffer3[9]+2*temp];
 					DimOn();
 					delay13();
 					SPDR = LargeNumbers[buffer3[9]+2*temp+1];
-					//               delay4();
 				} else {
 					_delay_loop_1(10);
 				}
@@ -377,7 +370,6 @@ void detectline() {
 					DimOn();
 					delay13();
 					SPDR = LargeNumbers[buffer3[10]+2*temp+1];
-					//               delay4();
 				} else {
 					_delay_loop_1(10);
 				}
@@ -451,7 +443,6 @@ void detectline() {
 				buffer2[7]=14<<5;
 			}
 		} else {
-			//     _delay_loop_1(3);
 			if (temp > 8) {
 				delay5();
 				SPDR = letters[(3<<3)+(temp-8)];
@@ -476,8 +467,6 @@ void detectline() {
 			delay15();
 			SPDR = LargeNumbers[480+2*temp];
 			delay8();
-			//               SPDR = LargeNumbers[32+2*temp+1];
-			//               delay13();
 			SPDR = LargeNumbers[buffer2[2]+2*temp];
 			delay15();
 			SPDR = LargeNumbers[buffer2[2]+2*temp+1];
@@ -559,7 +548,6 @@ void detectline() {
 		// Used to align the text
 		_delay_loop_1(align_text);
 		temp = line - (toplinetext+1);
-		//_delay_loop_1(13);
 		// Writes SPEED, which is the first 5 characters in the toptext array
 		buffer[0]=(toptext[0])<<3;
 		buffer[1]=(toptext[1])<<3;
@@ -614,7 +602,7 @@ void detectline() {
 		// Used to align the text
 		_delay_loop_1(align_text);
 		if (menuon==1) {
-			if (line == summaryline+1) {
+			/*if (line == summaryline+1) {
 				move_arrow_count++;
 				if (move_arrow_count== 30) {
 					move_arrow_count=0;
@@ -991,7 +979,7 @@ void detectline() {
 					}
 					DimOff();
 				}
-			}
+			}*/
 		} else if (homepos ==0) {
 			temp = line - (summaryline +1);
 			_delay_loop_1(17);
@@ -1668,6 +1656,11 @@ void detectline() {
 			loopcount=0;
 		}
 		
+		#if (digital_rssi == 1)
+			// Capture the rssi pwm value
+			pwm_enable();
+		#endif
+		
 		if (loopcount == 0) {
 			#if (digital_rssi == 0)
 				// with 10 bit ADC and 5 volt ref coltage we have;
@@ -1679,18 +1672,19 @@ void detectline() {
 				ADCtemp2=ADCH;
 				// Adding the high and low register;
 				rssi_reading=ADCtemp+(ADCtemp2<<8);
-                                //rssi_reading=((rssi_reading-rssi_min)*rssi_cal);
+                
 				#if (show_raw_rssi == 0)
-					rssi_reading = 100-((int16_t)((rssi_reading-48)/(int16_t)2));
+					rssi_reading=((rssi_reading-rssi_min)*rssi_cal);
+					/*rssi_reading = 100-((int16_t)((rssi_reading-48)/(int16_t)2));*/
 					rssi_negative=0;
 					if (rssi_reading < 0) {
 						rssi_reading = 0;
 					}
-                                        rssir[0]= (rssi_reading / 100)+3;
+                    rssir[0]= (rssi_reading / 100)+3;
 					rssir[1]= ((rssi_reading % 100) / 10)+3;
 					rssir[2]= ((rssi_reading % 100) % 10)+3;
-                                #else
-                                  rssir[0]=(  rssi_reading/1000)+3;
+                #else
+                  rssir[0]=(  rssi_reading/1000)+3;
 				  rssir[1]=(( rssi_reading%1000)/100)+3;      
 				  rssir[2]=(((rssi_reading%1000)%100)/10)+3; 
 				  rssir[3]=(((rssi_reading%1000)%100)%10)+3;
@@ -1704,14 +1698,10 @@ void detectline() {
 					rssir[2]=(((rssi_reading%1000)%100)/10)+3; 
 					rssir[3]=(((rssi_reading%1000)%100)%10)+3;
 				#else
-					if (duration != 0 && duration <= rssi_max && duration >= rssi_min) {
-						//rssi_reading = (uint16_t)(((uint32_t)((duration - rssi_min)*100))/(uint32_t)(MAX_DURATION));
-rssi_reading = last_maxline;
-last_maxline = 0;
-						rssir[0]= (rssi_reading / 100)+3;
-						rssir[1]= ((rssi_reading % 100) / 10)+3;
-						rssir[2]= ((rssi_reading % 100) % 10)+3;
-					}	
+					rssi_reading = (uint16_t)(((uint32_t)((duration - rssi_min)*100))/(uint32_t)(MAX_DURATION));
+					rssir[0]= (rssi_reading / 100)+3;
+					rssir[1]= ((rssi_reading % 100) / 10)+3;
+					rssir[2]= ((rssi_reading % 100) % 10)+3;
 				#endif
 			#endif
 		}
@@ -1753,7 +1743,6 @@ last_maxline = 0;
 			// Updates the total mah consumed.
 			mah = mah+current_num;
 			// For testing timing.. Almost at the end of line..
-			//SPDR=0b11111100;
 		}
 		if (loopcount == 4) {
 			// 10.000 mAh is 10 amps in 1 hour. With 5 hz update rate
@@ -1771,7 +1760,6 @@ last_maxline = 0;
 				mahtemp = mah/21.6;
 			}
 			// Prette close at line-end already...
-			//SPDR=0b11111100;
 			// The ADC is 10 bit, so we have to read from 2 registers. (This is used for battery-voltage)
 			ADCtemp=ADCL;
 			ADCtemp2=ADCH;
@@ -1781,15 +1769,12 @@ last_maxline = 0;
 		if (loopcount == 5) {
 			// Updates the 2 first mah numbers;
 			mahr[0]=(   mahtemp / 10000)+3;
-			// For testing timing.. Almost at the end of line..
-			//SPDR=0b11111100;
 			// Divides with 1.82 - calibration. This matches my voltage-divider (2 resistors).
 			ADCreal2=ADCreal/voltage_divider_cal;
 		}
 		if (loopcount == 6) {
 			// Updates the 3 last numbers of mAh consumed.
 			mahr[1]=(  (mahtemp % 10000) / 1000)+3;
-			//SPDR=0b11111100;
 			// Updates the battery-voltage that will be shown.
 			bat_volt=ADCreal2;
 			voltager[0]= (ADCreal2 / 100)+3;
@@ -1801,27 +1786,21 @@ last_maxline = 0;
 			// Updates the 3 last numbers of mAh consumed.
 			mahr[2]=(( (mahtemp % 10000) % 1000) / 100)+3;
 			// Timing seems fine - just at the end of the line
-			//SPDR=0b11111100;
 		}
 		if (loopcount == 8) {
 			// Updates the 3 last numbers of mAh consumed.
 			mahr[3]=((((mahtemp % 10000) % 1000) % 100) / 10)+3;
 			// Timing seems fine - just at the end of the line
-			//SPDR=0b11111100;
 		}
 		if (loopcount == 9) {
 			// Updates the 3 last numbers of mAh consumed.
 			mahr[4]=((((mahtemp % 10000) % 1000) % 100) % 10)+3;
 			// Timing seems fine - just at the end of the line
-			//SPDR=0b11111100;
 			#if (digital_rssi == 0)
 				// Setup ADC to be used with RSSI
 				mux_rssi();
 				// Start the conversion (ADC)
 				ADCSRA|=(1<<ADSC);
-			#else
-				// Capture the rssi pwm value
-				pwm_enable();
 			#endif
 		}
 	}
