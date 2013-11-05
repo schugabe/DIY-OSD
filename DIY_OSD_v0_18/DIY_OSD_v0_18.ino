@@ -122,7 +122,7 @@ void setup() {
 	if (CONTROLLER ==2) {
 		attachInterrupt(0,detectline,FALLING);
 		attachInterrupt(1,detectframe,RISING);  
-		pinMode(13,OUTPUT);
+		pinMode(13,INPUT);
 		digitalWrite(13,HIGH); // Turn on the led
 		
 		// enable pwm rssi input
@@ -132,11 +132,10 @@ void setup() {
 			// nothing needed here
 			TCCR1A = (0<<WGM10) | (0<<WGM11) | (0<<COM1A1) | (0<<COM1A0) | (0<<COM1B1) | (0<<COM1B0);
 			//  prescaler 8
-			TCCR1B = (0<<CS10) | (1<<CS11) | (0<<CS12) | (0<<WGM13)| (0<<WGM12);
+			 TCCR1B = (1<<ICNC1) | (1<<ICES1) | (0<<CS10) | (1<<CS11) | (0<<CS12) | (0<<WGM13)| (0<<WGM12);
 			// turn off output compare
 			TCCR1C = (0<<FOC1A) | (0<<FOC1B);
-			// set input capture rising
-			TCCR1B |= (1<<ICNC1) | (1<<ICES1);	
+			//pwm_enable();
 		#endif
 	}
 	

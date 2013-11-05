@@ -11,7 +11,7 @@
 
 extern unsigned char align_text;
 extern unsigned char flight_timer[];
-
+extern unsigned long flight_time;
 extern unsigned char show_plane_pos;
 extern unsigned char show_mah_km;
 extern unsigned char mahkmr[];
@@ -65,42 +65,58 @@ typedef enum { falling, rising } pwm_state_t;
 
 volatile static uint16_t rising_ticks , falling_ticks;
 volatile static pwm_state_t state;
-volatile static uint32_t duration = 0;
+volatile static uint32_t duration = invalid_rssi;
+volatile unsigned long last_rssi_measurement = 0;
+unsigned char invalid_count = 0;
 #define MAX_DURATION  (rssi_max-rssi_min)
 
-#define SET_RISING()  TCCR1B |=  (1<<ICES1); TIFR1 |= (1<<ICF1)
-#define SET_FALLING() TCCR1B &= ~(1<<ICES1); TIFR1 |= (1<<ICF1)
+#define SET_RISING()  TCCR1B |=  (1<<ICES1)
+#define SET_FALLING() TCCR1B &= ~(1<<ICES1)
 #define PWM_DISABLE() TIMSK1 &= ~(1<<ICIE1)
 
 void pwm_enable() {
 	state = rising;
 	rising_ticks = falling_ticks = 0;
+        
 	SET_RISING();
-	
-	//enable interrupt
+        
+        //clear pending interrupt
+        TIFR1 |= (1<<ICF1);
+        
+        //enable interrupt
 	TIMSK1 |= (1<<ICIE1);
 }
 
 
 // input capture interrupt
 ISR(TIMER1_CAPT_vect) {
+	//uint16_t tmp = ICR1;
 	// if we are capturing rising edge store start time and wait for falling edge
 	if (state == rising) {
 		rising_ticks = ICR1;
 		state = falling;
 		SET_FALLING();
+                //digitalWrite(13,HIGH);
 	}
 	// if we are capturing falling edge store value and calculate duration
 	else if (state == falling) {
 		falling_ticks = ICR1;
-
-		PWM_DISABLE();
-
+		
+		// Capture the rssi pwm value
 		if (rising_ticks > falling_ticks)
 			duration = rising_ticks - falling_ticks;
 		else
 			duration = falling_ticks - rising_ticks;
+		
+		//duration = tmp;
+                last_rssi_measurement = flight_time;
+		
+		//SET_RISING();
+		PWM_DISABLE();
 	}
+	
+	// disable pending external interrupts to prevent imaging errors
+	//EIFR = 0x3;
 }
 #endif
 
@@ -140,7 +156,13 @@ void detectline() {
 						mahkmr[3]=rssir[2];
 					#endif
 				}
-				if (mahkmr[0]==3 && mahkmr[1]==3 && mahkmr[2]==3) {
+				if (mahkmr[0]==3 && mahkmr[1]==3 && mahkmr[2]==3 && mahkmr[3] == 3) {
+					mahkm_buf[0]=14<<5;
+					mahkm_buf[1]=14<<5;
+					mahkm_buf[2]=14<<5;
+					mahkm_buf[3]=14<<5;
+				}
+				else if (mahkmr[0]==3 && mahkmr[1]==3 && mahkmr[2]==3) {
 					mahkm_buf[0]=14<<5;
 					mahkm_buf[1]=14<<5;
 					mahkm_buf[2]=14<<5;
@@ -420,6 +442,11 @@ void detectline() {
 			}
 		}
 	}
+        else if (line == toplinenumbers +font_lines_count+1) {
+          #if (digital_rssi == 1)
+		  pwm_enable();
+		#endif
+         }
 	////////////////////////////////////////////
 	// Top line big numbers END
 	////////////////////////////////////////////
@@ -1655,12 +1682,7 @@ void detectline() {
 		if (loopcount == 10) {
 			loopcount=0;
 		}
-		
-		#if (digital_rssi == 1)
-			// Capture the rssi pwm value
-			pwm_enable();
-		#endif
-		
+	
 		if (loopcount == 0) {
 			#if (digital_rssi == 0)
 				// with 10 bit ADC and 5 volt ref coltage we have;
@@ -1690,7 +1712,7 @@ void detectline() {
 				  rssir[3]=(((rssi_reading%1000)%100)%10)+3;
 				#endif
 			
-			#else					
+			#else                            
 				#if (show_raw_rssi == 1)
 					rssi_reading = duration;
 					rssir[0]=(  rssi_reading/1000)+3;
@@ -1698,11 +1720,23 @@ void detectline() {
 					rssir[2]=(((rssi_reading%1000)%100)/10)+3; 
 					rssir[3]=(((rssi_reading%1000)%100)%10)+3;
 				#else
-					rssi_reading = (uint16_t)(((uint32_t)((duration - rssi_min)*100))/(uint32_t)(MAX_DURATION));
-					rssir[0]= (rssi_reading / 100)+3;
-					rssir[1]= ((rssi_reading % 100) / 10)+3;
-					rssir[2]= ((rssi_reading % 100) % 10)+3;
+					if ((duration >= rssi_min-1) && (duration <= rssi_max+1) && (last_rssi_measurement+5 >= flight_time)){
+                                                invalid_count = 0;
+						rssi_reading = (uint16_t)(((uint32_t)((duration - rssi_min)*100))/(uint32_t)(MAX_DURATION));
+						rssir[0]= (rssi_reading / 100)+3;
+						rssir[1]= ((rssi_reading % 100) / 10)+3;
+						rssir[2]= ((rssi_reading % 100) % 10)+3;
+					}
+                                        else if (invalid_count < 5) {
+                                          invalid_count++;
+                                        }
+					else {
+						rssir[0] = rssir[1] = rssir[2] = rssir[3] = 3;
+					}
 				#endif
+				// reset duration to max value
+                                //if (flight_time > last_rssi_measurement+5)
+				//  duration = invalid_rssi;
 			#endif
 		}
 		if (loopcount == 1) {
@@ -1802,7 +1836,9 @@ void detectline() {
 				// Start the conversion (ADC)
 				ADCSRA|=(1<<ADSC);
 			#endif
+                        
 		}
+
 	}
 	// ============================================================
 	// Current sensor END

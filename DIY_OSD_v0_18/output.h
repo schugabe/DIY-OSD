@@ -6,4 +6,7 @@
 void detectframe();
 void detectline();
 
+#if (digital_rssi==1)
+void pwm_enable();
+#endif
 #endif

@@ -16,7 +16,7 @@
 // Video system: PAL or NTSC
 //===========================
 // Pal = 0, NTSC = 1
-#define VIDEO_SYSTEM 1
+#define VIDEO_SYSTEM 0
 #define large_font 1
 
 //=============================================================================================
@@ -83,7 +83,7 @@
 // RSSI setup. Please note, when RSSI is active it will replace mah/km.
 #define digital_rssi 1 	// 1 = on, 0 = off
 #define show_rssi 1	// 1 = on, 0 = off
-#define show_raw_rssi 1 // 1= on, 0 = off
+#define show_raw_rssi 0 // 1= on, 0 = off
 
 #if (digital_rssi == 0)
 	#define rssi_cal 1 
@@ -92,8 +92,9 @@
 #else
 	// Min/Max Values for rssi pwm duration, in this case for ezuhf signal quality.
         // example values for rssi signal, enable show_raw_rssi to find out min/max values here
-	#define rssi_min 1966
-	#define rssi_max 3568
+	#define rssi_min 2113
+	#define rssi_max 3586
+	#define invalid_rssi 4000
 #endif
 
 // I was asked to make a calculation on mah/km - this can be useful to find the most efficient cruise-speed etc.
@@ -115,7 +116,7 @@
 
 // Dimming can be turned off. Mainly for debugging
 // 1 = on, 0 = off
-#define dim_on 0
+#define dim_on 1
 
 // Show plane pos
 #define show_plane_pos_ 0
