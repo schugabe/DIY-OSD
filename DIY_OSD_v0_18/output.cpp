@@ -11,7 +11,6 @@
 
 extern unsigned char align_text;
 extern unsigned char flight_timer[];
-extern unsigned long flight_time;
 extern unsigned char show_plane_pos;
 extern unsigned char show_mah_km;
 extern unsigned char mahkmr[];
@@ -60,6 +59,7 @@ extern unsigned char altitude2[10];
 extern unsigned char altituder[10];
 
 #if (digital_rssi==1)
+/*
 // RSSI PWM Input
 typedef enum { falling, rising } pwm_state_t;
 
@@ -80,8 +80,8 @@ void pwm_enable() {
         
 	SET_RISING();
         
-        //clear pending interrupt
-        TIFR1 |= (1<<ICF1);
+    //clear pending interrupt
+    TIFR1 |= (1<<ICF1);
         
         //enable interrupt
 	TIMSK1 |= (1<<ICIE1);
@@ -117,7 +117,7 @@ ISR(TIMER1_CAPT_vect) {
 	
 	// disable pending external interrupts to prevent imaging errors
 	//EIFR = 0x3;
-}
+}*/
 #endif
 
 // frame output
@@ -442,11 +442,6 @@ void detectline() {
 			}
 		}
 	}
-        else if (line == toplinenumbers +font_lines_count+1) {
-          #if (digital_rssi == 1)
-		  pwm_enable();
-		#endif
-         }
 	////////////////////////////////////////////
 	// Top line big numbers END
 	////////////////////////////////////////////
@@ -1615,7 +1610,7 @@ void detectline() {
 		}
 	}
 	// ============================================================
-	// Buttom line text
+	// Bottom line text
 	// ============================================================
 	else if (line == butlinenumbers ) {
 		if (currentr[0]== 3) {
@@ -1675,7 +1670,7 @@ void detectline() {
 	// ============================================================
 	// As the calculations takes quite a while they will be done after last line with text.
 	// Otherwise the text will "jump a bit". We might miss a line or two - but as it is in
-	// the buttom of the screen where we don't need text, it doesn't really matter.
+	// the bottom of the screen where we don't need text, it doesn't really matter.
 	else if (line == current_calc_line) {
 		loopcount++;
 		// With 50 FPS, this will give an update-rate of 5 hz. (with odd/even lines 10 hz)
@@ -1711,32 +1706,6 @@ void detectline() {
 				  rssir[2]=(((rssi_reading%1000)%100)/10)+3; 
 				  rssir[3]=(((rssi_reading%1000)%100)%10)+3;
 				#endif
-			
-			#else                            
-				#if (show_raw_rssi == 1)
-					rssi_reading = duration;
-					rssir[0]=(  rssi_reading/1000)+3;
-					rssir[1]=(( rssi_reading%1000)/100)+3;      
-					rssir[2]=(((rssi_reading%1000)%100)/10)+3; 
-					rssir[3]=(((rssi_reading%1000)%100)%10)+3;
-				#else
-					if ((duration >= rssi_min-1) && (duration <= rssi_max+1) && (last_rssi_measurement+5 >= flight_time)){
-                                                invalid_count = 0;
-						rssi_reading = (uint16_t)(((uint32_t)((duration - rssi_min)*100))/(uint32_t)(MAX_DURATION));
-						rssir[0]= (rssi_reading / 100)+3;
-						rssir[1]= ((rssi_reading % 100) / 10)+3;
-						rssir[2]= ((rssi_reading % 100) % 10)+3;
-					}
-                                        else if (invalid_count < 5) {
-                                          invalid_count++;
-                                        }
-					else {
-						rssir[0] = rssir[1] = rssir[2] = rssir[3] = 3;
-					}
-				#endif
-				// reset duration to max value
-                                //if (flight_time > last_rssi_measurement+5)
-				//  duration = invalid_rssi;
 			#endif
 		}
 		if (loopcount == 1) {
