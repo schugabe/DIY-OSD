@@ -77,7 +77,7 @@ unsigned long last_rssi_measurement = 0;
 #define MAX_DURATION  (rssi_max-rssi_min)
 #define SET_RISING()  TCCR1B |=  (1<<ICES1)
 #define SET_FALLING() TCCR1B &= ~(1<<ICES1)
-
+extern unsigned char *rssir;
 #endif
 //========================================
 // Menu system
@@ -389,7 +389,7 @@ void gps() {
 	while (1==1) {
     
 		SPDR =0b00000000;
-		if (UCSR0A & (1<<RXC0)) {
+		if (UCSR0A & _BV(RXC0)) {
 			GPSbuffer[bufnr] = UDR0;
 
 			bufnr++;
@@ -948,7 +948,7 @@ void gps() {
             }            
             
             //clear input capture interrupt
-            TIFR1 |= (1<<ICF1);
+            TIFR1 = _BV(ICF1);
         }
         
            

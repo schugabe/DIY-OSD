@@ -267,7 +267,4 @@
 #define delay2()   __asm__("nop\n\t""nop\n\t")
 #define delay1()   __asm__("nop\n\t")
 
-#define clock 16000000
-#define BAUD_SETTINGS (clock/16/BAUD-1)
-
 #endif

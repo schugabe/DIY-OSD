@@ -19,6 +19,7 @@
 #include "output.h"
 #include "gps.h"
 
+#include <util/setbaud.h>
 
 #include <util/delay.h>
 #include <avr/pgmspace.h>
@@ -52,8 +53,8 @@ void setup() {
 
 	// Init Serial communication. 
 	Serial.begin(BAUD);
-	UBRR0H = (unsigned char) (BAUD_SETTINGS>>8);
-	UBRR0L = (unsigned char) (BAUD_SETTINGS);
+	UBRR0H = UBRRH_VALUE;
+	UBRR0L = UBRRL_VALUE;
 	UCSR0A = 0b0000000;
 	UCSR0B = (1<<RXEN0) | (1<<TXEN0);
 	UCSR0C = (3<<UCSZ00);
