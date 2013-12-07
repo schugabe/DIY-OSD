@@ -183,9 +183,9 @@ void detectline() {
 					mahkm_buf[2]=(mahkmr[2])<<5;
 					mahkm_buf[3]=(mahkmr[3])<<5;
 				}
-				//if (rssi_negative==1 && show_rssi==1) {
-				//	mahkm_buf[0]=13<<5;
-				//}
+				/*if (rssi_negative==1 && show_rssi==1) {
+					mahkm_buf[0]=13<<5;
+				}*/
 			}
 			//SPDR = 0b11111110;
 		} else {
@@ -1679,34 +1679,32 @@ void detectline() {
 		}
 	
 		if (loopcount == 0) {
-			#if (digital_rssi == 0)
-				// with 10 bit ADC and 5 volt ref coltage we have;
-				// (with 50 A current sensor)
-				// 1024/5 = 205 = 1 volt = 10 A
-				// First the ADC is set to take a reading;
-				// The ADC is 10 bit, so we have to read from 2 registers.
-				ADCtemp=ADCL;
-				ADCtemp2=ADCH;
-				// Adding the high and low register;
-				rssi_reading=ADCtemp+(ADCtemp2<<8);
+#if (digital_rssi == 0)
+			// with 10 bit ADC and 5 volt ref coltage we have;
+			// (with 50 A current sensor)
+			// 1024/5 = 205 = 1 volt = 10 A
+			// First the ADC is set to take a reading;
+			rssi_reading = ADC;
                 
-				#if (show_raw_rssi == 0)
-					rssi_reading=((rssi_reading-rssi_min)*rssi_cal);
-					/*rssi_reading = 100-((int16_t)((rssi_reading-48)/(int16_t)2));*/
-					rssi_negative=0;
-					if (rssi_reading < 0) {
-						rssi_reading = 0;
-					}
-                    rssir[0]= (rssi_reading / 100)+3;
-					rssir[1]= ((rssi_reading % 100) / 10)+3;
-					rssir[2]= ((rssi_reading % 100) % 10)+3;
-                #else
-                  rssir[0]=(  rssi_reading/1000)+3;
-				  rssir[1]=(( rssi_reading%1000)/100)+3;      
-				  rssir[2]=(((rssi_reading%1000)%100)/10)+3; 
-				  rssir[3]=(((rssi_reading%1000)%100)%10)+3;
-				#endif
-			#endif
+#if (show_raw_rssi == 0)
+			rssi_reading=((rssi_reading-rssi_min)*rssi_cal);
+			rssi_negative=0;
+			if (rssi_reading < 0)
+				rssi_reading = 0;
+#endif
+#endif
+			
+#if (show_raw_rssi == 0)						
+			rssir[0] = (rssi_reading / 100)+3;
+			rssir[1] = ((rssi_reading % 100) / 10)+3;
+			rssir[2] = ((rssi_reading % 100) % 10)+3;
+#else
+			rssir[0] = (  rssi_reading/1000)+3;
+			rssir[1] = (( rssi_reading%1000)/100)+3;      
+			rssir[2] = (((rssi_reading%1000)%100)/10)+3; 
+			rssir[3] = (((rssi_reading%1000)%100)%10)+3;
+#endif
+			rssi_read = 1;
 		}
 		if (loopcount == 1) {
 			// Setup ADC to be used with current sensor

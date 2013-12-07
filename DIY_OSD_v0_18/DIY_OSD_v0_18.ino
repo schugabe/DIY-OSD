@@ -128,15 +128,12 @@ void setup() {
 		
 		// enable pwm rssi input
 		#if (digital_rssi==1)
-			pinMode(RSSI_INPUT_PIN,INPUT); 
-			digitalWrite(RSSI_INPUT_PIN,HIGH);
+			DDRB &= ~_BV(0);
+			PORTB |= _BV(0);
 			// nothing needed here
-			TCCR1A = (0<<WGM10) | (0<<WGM11) | (0<<COM1A1) | (0<<COM1A0) | (0<<COM1B1) | (0<<COM1B0);
+			TCCR1A = 0;
 			//  prescaler 8
-			 TCCR1B = (1<<ICNC1) | (1<<ICES1) | (0<<CS10) | (1<<CS11) | (0<<CS12) | (0<<WGM13)| (0<<WGM12);
-			// turn off output compare
-			TCCR1C = (0<<FOC1A) | (0<<FOC1B);
-			//pwm_enable();
+			 TCCR1B = _BV(ICNC1) | _BV(ICES1) | _BV(CS11);
 		#endif
 	}
 	

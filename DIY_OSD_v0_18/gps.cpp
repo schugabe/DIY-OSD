@@ -68,16 +68,17 @@ int lat_deg = 90;
 // RSSI
 #if (digital_rssi==1)
 typedef enum { falling, rising } pwm_state_t;
-
-static uint16_t rising_ticks , falling_ticks;
+static uint16_t rising_ticks;
 static pwm_state_t state = rising;
-
+static uint8_t current_min = 100;
 unsigned long last_rssi_measurement = 0;
 
 #define MAX_DURATION  (rssi_max-rssi_min)
-#define SET_RISING()  TCCR1B |=  (1<<ICES1)
-#define SET_FALLING() TCCR1B &= ~(1<<ICES1)
-extern unsigned char *rssir;
+#define SET_RISING()  TCCR1B |=  (1<<ICES1); TCNT1 = 0;	state = rising; TIFR1 = _BV(ICF1) | _BV(TOV1)
+#define SET_FALLING() TCCR1B &= ~(1<<ICES1); state = falling; TIFR1 = _BV(ICF1) | _BV(TOV1)
+
+extern volatile int rssi_reading;
+extern volatile uint8_t rssi_read;
 #endif
 //========================================
 // Menu system
@@ -384,10 +385,9 @@ void gps() {
 	}*/
 
     SET_RISING();
-    rising_ticks = falling_ticks  = 0;
+    rising_ticks = 0;
     
-	while (1==1) {
-    
+	while (1) {
 		SPDR =0b00000000;
 		if (UCSR0A & _BV(RXC0)) {
 			GPSbuffer[bufnr] = UDR0;
@@ -905,52 +905,49 @@ void gps() {
 				bufnr=0;
 			}
 		}
-        
-        // new timer value captured
-        if (TIFR1 & (1<<ICF1)) {
-            if (state == rising) {
+		
+		#if (digital_rssi==1)  
+		
+		if (rssi_read) {
+			rssi_read = 0;
+			current_min = 100;
+		}
+		// overflow occured => invalid result
+		if (TIFR1 & _BV(TOV1)) {
+            SET_RISING();
+		}
+		// new timer value captured
+        else if (TIFR1 & _BV(ICF1)) {
+			uint32_t timer = ICR1;
+            
+			if (state == rising) {
                 SET_FALLING();
-                rising_ticks = ICR1;
-                state = falling;
+                rising_ticks = timer;
             }
             else {
-                falling_ticks = ICR1;
-                SET_RISING();
-                state = rising;
+                SET_RISING();         
+        		timer = timer - rising_ticks;                
                 
-                uint16_t tmp;
-                
-        		if (rising_ticks > falling_ticks)
-        			tmp = UINT16_MAX - rising_ticks - falling_ticks;
-        		else
-        			tmp = falling_ticks - rising_ticks;                
-                
-                if (tmp >= (rssi_min-10) && tmp <= (rssi_max+10) ) {
+                if (timer >= (rssi_min-10) && timer <= (rssi_max+10) ) {
                     last_rssi_measurement = flight_time;
                     
-                    #if (show_raw_rssi == 1)
-                        rssir[0]=(  tmp/1000)+3;
-                        rssir[1]=(( tmp%1000)/100)+3;      
-                        rssir[2]=(((tmp%1000)%100)/10)+3; 
-                        rssir[3]=(((tmp%1000)%100)%10)+3;
-                    #else
-                        tmp = (uint16_t)(((uint32_t)((tmp - rssi_min)*100))/(uint32_t)(MAX_DURATION));
-                        rssir[0]= (tmp / 100)+3;
-                        rssir[1]= ((tmp % 100) / 10)+3;
-                        rssir[2]= ((tmp % 100) % 10)+3;
+					#if (show_raw_rssi == 0)
+                    	timer = (timer - rssi_min)*100;
+                        timer /= MAX_DURATION;
+						if (timer > current_min)
+							timer = current_min;
+						else
+							current_min = timer;
                     #endif
+					
+				  	rssi_reading = timer;
                 }
-                else {
-                    if (last_rssi_measurement+2 < flight_time) {
-                        rssir[0] = rssir[1] = rssir[2] = rssir[3] = 3;
-                    }
-                }
-            }            
-            
-            //clear input capture interrupt
-            TIFR1 = _BV(ICF1);
+            }
         }
-        
-           
+		
+        if (last_rssi_measurement+2 < flight_time) {
+           rssi_reading = 0;
+        }
+		#endif
     } 
 }

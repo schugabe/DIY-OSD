@@ -61,7 +61,8 @@ unsigned int mahkm_buf[5];
 
 unsigned char showcoordinates=1;
 
-int rssi_reading=0;
+volatile int rssi_reading=0;
+volatile uint8_t rssi_read = 0;
 unsigned char rssir[]={
   3,3,3,3};
 unsigned char rssi_negative = 0;
