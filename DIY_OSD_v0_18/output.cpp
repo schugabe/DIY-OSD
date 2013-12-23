@@ -58,68 +58,6 @@ extern unsigned char speedkmw[5];
 extern unsigned char altitude2[10];
 extern unsigned char altituder[10];
 
-#if (digital_rssi==1)
-/*
-// RSSI PWM Input
-typedef enum { falling, rising } pwm_state_t;
-
-volatile static uint16_t rising_ticks , falling_ticks;
-volatile static pwm_state_t state;
-volatile static uint32_t duration = invalid_rssi;
-volatile unsigned long last_rssi_measurement = 0;
-unsigned char invalid_count = 0;
-#define MAX_DURATION  (rssi_max-rssi_min)
-
-#define SET_RISING()  TCCR1B |=  (1<<ICES1)
-#define SET_FALLING() TCCR1B &= ~(1<<ICES1)
-#define PWM_DISABLE() TIMSK1 &= ~(1<<ICIE1)
-
-void pwm_enable() {
-	state = rising;
-	rising_ticks = falling_ticks = 0;
-        
-	SET_RISING();
-        
-    //clear pending interrupt
-    TIFR1 |= (1<<ICF1);
-        
-        //enable interrupt
-	TIMSK1 |= (1<<ICIE1);
-}
-
-
-// input capture interrupt
-ISR(TIMER1_CAPT_vect) {
-	//uint16_t tmp = ICR1;
-	// if we are capturing rising edge store start time and wait for falling edge
-	if (state == rising) {
-		rising_ticks = ICR1;
-		state = falling;
-		SET_FALLING();
-                //digitalWrite(13,HIGH);
-	}
-	// if we are capturing falling edge store value and calculate duration
-	else if (state == falling) {
-		falling_ticks = ICR1;
-		
-		// Capture the rssi pwm value
-		if (rising_ticks > falling_ticks)
-			duration = rising_ticks - falling_ticks;
-		else
-			duration = falling_ticks - rising_ticks;
-		
-		//duration = tmp;
-                last_rssi_measurement = flight_time;
-		
-		//SET_RISING();
-		PWM_DISABLE();
-	}
-	
-	// disable pending external interrupts to prevent imaging errors
-	//EIFR = 0x3;
-}*/
-#endif
-
 // frame output
 void detectframe() {
 	line = 0;
@@ -624,7 +562,8 @@ void detectline() {
 		// Used to align the text
 		_delay_loop_1(align_text);
 		if (menuon==1) {
-			/*if (line == summaryline+1) {
+			#if (Usebutton == 1)
+			if (line == summaryline+1) {
 				move_arrow_count++;
 				if (move_arrow_count== 30) {
 					move_arrow_count=0;
@@ -1001,8 +940,9 @@ void detectline() {
 					}
 					DimOff();
 				}
-			}*/
-		} else if (homepos ==0) {
+			}
+			#endif
+		} else if (homepos == 0) {
 			temp = line - (summaryline +1);
 			_delay_loop_1(17);
 			if (temp < 8) {
@@ -1065,7 +1005,6 @@ void detectline() {
 				for (i=0; i<test; i++) {
 					loadbar[i]=26;
 				}
-				// SPDR=0b11111110;
 			}
 			if (temp == 20) {
 				for (unsigned char ij=0; ij<9; ij++) {
@@ -1693,7 +1632,6 @@ void detectline() {
 				rssi_reading = 0;
 #endif
 #endif
-			
 #if (show_raw_rssi == 0)						
 			rssir[0] = (rssi_reading / 100)+3;
 			rssir[1] = ((rssi_reading % 100) / 10)+3;

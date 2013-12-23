@@ -91,10 +91,9 @@
 	#define rssi_min 0//103
 #else
 	// Min/Max Values for rssi pwm duration, in this case for ezuhf signal quality.
-        // example values for rssi signal, enable show_raw_rssi to find out min/max values here
+    // example values for rssi signal, enable show_raw_rssi to find out min/max values here
 	#define rssi_min 2113
 	#define rssi_max 3586
-	#define invalid_rssi 4000
 #endif
 
 // I was asked to make a calculation on mah/km - this can be useful to find the most efficient cruise-speed etc.
@@ -158,13 +157,13 @@
 
 #if (VIDEO_SYSTEM == 0)
 	// PAL
-  #define toplinetext 41
-  #define toplinenumbers 51
-  #define butlinenumbers 271
-  #define timer_line 252
-  #define gps_nmea_line 32
-  #define summaryline 102
-  #define current_calc_line 292
+	#define toplinetext 41
+	#define toplinenumbers 51
+	#define butlinenumbers 271
+	#define timer_line 252
+	#define gps_nmea_line 32
+	#define summaryline 102
+	#define current_calc_line 292
 #else 
 	//NTSC
 	#define toplinetext 24
