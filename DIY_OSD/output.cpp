@@ -1089,8 +1089,8 @@ void detectline() {
 				buffer[5]=('O'-64)<<3;
 				buffer[6]=('N'-64)<<3;
 				buffer[7]=(0+3)<<3;
-				buffer[8]=(1+3)<<3;
-				buffer[9]=(9+3)<<3;
+				buffer[8]=(2+3)<<3;
+				buffer[9]=(0+3)<<3;
 				DimOn();
 				for (unsigned char ij=0; ij<7; ij++) {
 					SPDR=letters[buffer[ij]+(temp)];
