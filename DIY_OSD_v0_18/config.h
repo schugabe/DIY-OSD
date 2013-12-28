@@ -1,5 +1,6 @@
 #ifndef config_h
 #define config_h
+#include <avr/io.h>
 
 //#include DIY_OSD_v0_18.ino
 //===========================
@@ -42,7 +43,7 @@
 // You can also take measurements and make a linear approximation in excel etc - a quick test gave me more or less the same result...
 
 // Voltage divider
-#define voltage_divider_cal 1.86         // For SimpleOSD, I have used 1.82 - the formula gives 1.86. Test with a multimeter 
+#define voltage_divider_cal 1.82         // For SimpleOSD, I have used 1.82 - the formula gives 1.86. Test with a multimeter 
 // Calculated by (1024)/(50*divider) 
 
 //Altitude offset (automatic set to 0 when home-position is set)
@@ -66,7 +67,7 @@
 ///*
 #define summary_speed 5       // Speed less than (in km/h)
 #define summary_los 100       // LOS less than (in meters)
-#define summary_current 99   // Current less than (in amps)
+#define summary_current 1   // Current less than (in amps)
 #define summary_time 0       // Flight time more than (in seconds)
 #define summary_altitude 999  // altitude less than (in meters)
 //*/
@@ -245,6 +246,15 @@
 	#define little_delay() _delay_loop_1(13)
 #endif
 
+// definitions for low pass filters for current/voltage measurement
+
+// this type needs to be adjusted if strength is increased
+typedef uint16_t adc_filter_sum_t;
+#define VOLTAGE_FILTER_STRENGTH 2
+#define CURRENT_FILTER_STRENGTH 1
+
+// ADC commands
+#define start_adc() ADCSRA |= (1<<ADSC)
 #define mux_currentSens() ADMUX = (0<<MUX3) | (0<<MUX2) | (0<<MUX1) | (current_sensor_input<<MUX0) | (1<<REFS0) |(0<<REFS1)
 #define mux_batVoltage() ADMUX = (0<<MUX3) | (0<<MUX2) | (0<<MUX1) | (voltage_divider_input<<MUX0) | (1<<REFS0) |(0<<REFS1)
 #define mux_rssi() ADMUX = (0<<MUX3) | (0<<MUX2) | (0<<MUX1) | (rssi_input<<MUX0) | (1<<REFS0) |(0<<REFS1)

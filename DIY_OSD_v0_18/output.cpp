@@ -58,6 +58,9 @@ extern unsigned char speedkmw[5];
 extern unsigned char altitude2[10];
 extern unsigned char altituder[10];
 
+extern adc_filter_sum_t voltage_sum, current_sum;
+extern uint16_t filtered_voltage, filtered_current;
+
 // frame output
 void detectframe() {
 	line = 0;
@@ -1616,7 +1619,7 @@ void detectline() {
 		if (loopcount == 10) {
 			loopcount=0;
 		}
-	
+
 		if (loopcount == 0) {
 #if (digital_rssi == 0)
 			// with 10 bit ADC and 5 volt ref coltage we have;
@@ -1648,21 +1651,21 @@ void detectline() {
 			// Setup ADC to be used with current sensor
 			mux_currentSens();
 			// Start the conversion (ADC)
-			ADCSRA|=(1<<ADSC);
+			start_adc();
 		}
 		// In next frame - the analog
 		// reading should have been ready for quite some time
 		if (loopcount == 2) {
-			// The ADC is 10 bit, so we have to read from 2 registers.
-			ADCtemp=ADCL;
-			ADCtemp2=ADCH;
-			// Adding the high and low register;
-			ADCreal=ADCtemp+(ADCtemp2<<8);
+			// Filter current reading
+			current_sum = current_sum - filtered_current + ADC;
+			
+			filtered_current = (current_sum+(1<<(CURRENT_FILTER_STRENGTH-1))) >> (CURRENT_FILTER_STRENGTH);
+			ADCreal = filtered_current;
 			// Prepare voltage reading for battery-voltage
 			// Setup ADC to be used with voltage reading on ADC7, and set the reference voltage.
 			mux_batVoltage();
 			// Start the conversion (ADC)
-			ADCSRA|=(1<<ADSC);
+			start_adc();
 			// Removes offset.
 			if (ADCreal <= offset_) {
 				ADCreal=0;
@@ -1698,18 +1701,18 @@ void detectline() {
 			else {
 				mahtemp = mah/21.6;
 			}
-			// Prette close at line-end already...
-			// The ADC is 10 bit, so we have to read from 2 registers. (This is used for battery-voltage)
-			ADCtemp=ADCL;
-			ADCtemp2=ADCH;
-			// Adding the high and low register;
-			ADCreal=ADCtemp+(ADCtemp2<<8);
 		}
 		if (loopcount == 5) {
 			// Updates the 2 first mah numbers;
 			mahr[0]=(   mahtemp / 10000)+3;
-			// Divides with 1.82 - calibration. This matches my voltage-divider (2 resistors).
-			ADCreal2=ADCreal/voltage_divider_cal;
+			
+			// Filter voltage reading
+			voltage_sum = voltage_sum - filtered_voltage + ADC;
+			
+			filtered_voltage = (voltage_sum+(1<<(VOLTAGE_FILTER_STRENGTH-1))) >> (VOLTAGE_FILTER_STRENGTH);
+			
+			// Divides with calibration. This matches my voltage-divider (2 resistors).
+			ADCreal2 = filtered_voltage/voltage_divider_cal;
 		}
 		if (loopcount == 6) {
 			// Updates the 3 last numbers of mAh consumed.
@@ -1739,11 +1742,9 @@ void detectline() {
 				// Setup ADC to be used with RSSI
 				mux_rssi();
 				// Start the conversion (ADC)
-				ADCSRA|=(1<<ADSC);
+				start_adc();
 			#endif
-                        
 		}
-
 	}
 	// ============================================================
 	// Current sensor END

@@ -26,6 +26,8 @@
 #include <EEPROM.h>
 
 extern int line;
+extern adc_filter_sum_t voltage_sum, current_sum;
+extern uint16_t filtered_voltage, filtered_current;
 
 void setup() {
 	// Set pin-modes:
@@ -173,6 +175,24 @@ void setup() {
 		EEPROM.write(16,(unsigned char) mah_alarm_);
 		EEPROM.write(17,(unsigned char) (mah_alarm_>>8));    
 	}
+	
+	
+	// init filters to avoid the time where the filter yields invalid results
+	ADCSRA |= _BV(ADIF);
+	mux_batVoltage();
+	start_adc();
+	while (!(ADCSRA & _BV(ADIF)));
+	
+	voltage_sum = ADC<<VOLTAGE_FILTER_STRENGTH;
+	filtered_voltage = ADC;
+	
+	ADCSRA |= _BV(ADIF);
+	mux_currentSens();
+	start_adc();
+	while (!(ADCSRA & _BV(ADIF)));
+	
+	current_sum = ADC<<CURRENT_FILTER_STRENGTH;
+	filtered_current = ADC;
 }
 
 

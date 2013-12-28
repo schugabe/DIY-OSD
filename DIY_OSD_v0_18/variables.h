@@ -67,5 +67,6 @@ unsigned char rssir[]={
   3,3,3,3};
 unsigned char rssi_negative = 0;
 
-// Numbers and letters
+adc_filter_sum_t voltage_sum = 0, current_sum = 0;
+uint16_t filtered_voltage = 0, filtered_current = 0;
 #endif
