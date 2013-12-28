@@ -1,19 +1,8 @@
-
-// Written by Dennis Frie - 2011
+// Current version created by Johannes Kasberger - 2013
+// Original work by Dennis Frie - 2011
 // Contact: Dennis.frie@gmail.com
-
-// Discussion:
 // www.rcgroups.com/forums/showthread.php?t=1473207
-
-// Support DIY hardware and SimpleOSD Open
-
-// Notes on DIY hardware pins:;
-// pin 6 = PD6 / AIN0 (Reference voltage)
-// Pin 7 = PD7 / AIN1 (Video)
-// Pin 11 = MOSI (SPI) used for pixel-generation. 
-// Pin 8 = Dimming (Optional)
-
-// GPS should be configured to NMEA with GPGGA and GPRMC strings.
+// Support DIY hardware, SimpleOSD Open and Simple OSD X2
 
 #include "config.h"
 #include "output.h"
@@ -62,7 +51,7 @@ void setup() {
 	UCSR0C = (3<<UCSZ00);
 
 	// Used to set the GPS update-rate to 5 hz, and GPGGA and GPRMC gps-strings (Only for MKT-GPS).
-
+	// GPS should be configured to NMEA with GPGGA and GPRMC strings.
 	Serial.print("$PMTK300,200,0,0,0,0*2F");
 	Serial.write(13);
 	Serial.write(10); 

@@ -1,20 +1,20 @@
 DIY-OSD
 =======
 
-An updated version of the DIY OSD from http://www.rcgroups.com/forums/showthread.php?t=1473207
+This firmware is an updated version of the DIY OSD firmware ( http://www.rcgroups.com/forums/showthread.php?t=1473207 ) that includes support for the SimpleOSD X2 from Flytron.
 
-Includes support for SimpleOSD X2 from Flytron http://www.rcgroups.com/forums/showpost.php?p=24214276&postcount=2254
+Beside of general improvements and small bug fixes this firmware supports digital rssi indication. Additionally a software low pass filter has been added to smooth the current/voltage readings.
 
 How-to
 ------
-**Warning** The changes have been not tested a lot so use firmware at your own risk.
+**Warning** Use this firmware at your own risk.
 
-Currently the config is set to display the signal quality from an ezuhf rx. So setup your ezuhf rx to output signal quality on a pin and connect the signal wire to the PB0 Pin (depending on your setup you might need to connect the ground of the rx to the ground of the osd as well but watch out for ground loops!!!) For other rx types the values in the config.h must be adjusted. 
+The example config is set to display the signal quality from an ezuhf rx. It is necessary to configure the ezuhf rx to output the signal quality on a pin and connect the signal wire to the PB0 Pin. Depending on the setup it might be necessary to connect the ground wire of the rx to the ground pin of the OSD (watch out for ground loops!). For other rx types the values rssi_min and rssi_max found in config.h must be adjusted. To find out the necessary values it is possible to set show_raw_rssi. If show_raw_rssi is set to 1 the unmodified duration of the PWM signal is displayed as RSSI. The value of rssi_max is the value visible with the tx switched on and rssi_min is the value visible where fail-safe is activated.
 
-If you don't know where to connect the wire: in the repository is a [picture](https://github.com/schugabe/DIY-OSD/blob/master/pb0.jpg "pb0") with a sign where PB0 is located. PC2 would be the pin for analog rssi readings.
+In this [picture](https://github.com/schugabe/DIY-OSD/blob/master/pb0.jpg "pb0") the location of PB0 is shown.
 
 Update the OSD Firmware:
-* Download the code and open DIY_OSD_v0_18.ino in the Arduino editor (download from http://arduino.cc/en/Main/Software_ )
+* Download the code and open DIY_OSD.ino in the Arduino editor (download from http://arduino.cc/en/Main/Software_ )
 * Select the com port of the FTDI cable in the Tools/Serial Port Menu
 * Select Arduino Pro or Pro Mini 5V,16Mhz with Atmega328 in the Tools/Board Menu as target device,
 * Connect the FTDI cable to the usb port of the computer
@@ -28,3 +28,4 @@ Change-log
 * fixed a bug where wrong pin for config button was read on SimpleOSD X2
 * changed analog rssi input to PC2 Pin (ADC or AN2 on schematic) for SimpleOSD X2
 * added support for digital pwm rssi input on PIN PB0 for SimpleOSD X2
+* added low pass filter to smooth voltage/current reading

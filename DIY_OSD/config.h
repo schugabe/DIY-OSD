@@ -2,13 +2,11 @@
 #define config_h
 #include <avr/io.h>
 
-//#include DIY_OSD_v0_18.ino
 //===========================
 // Hardware Arduino or SimpleOSD 16 mhz??
 //===========================
 
-// from code version 5, support for 16 mhz SimpleOSD with Arduino bootloader have been added. It uses the 
-//same microcontroller etc - but a LM1881 chip is used to detect new lines and frames.
+// from code version 5, support for 16 mhz SimpleOSD with Arduino bootloader have been added. It uses the same microcontroller etc - but a LM1881 chip is used to detect new lines and frames.
 
 //Arduino = 0, SimpleOSD OPEN = 1, SimpleOSD X2 = 2
 #define CONTROLLER 2
