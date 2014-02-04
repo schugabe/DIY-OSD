@@ -81,6 +81,10 @@ unsigned long last_rssi_measurement = 0;
 extern volatile int rssi_reading;
 extern volatile uint8_t rssi_read;
 #endif
+
+#if (USE_GPS==0)
+extern volatile uint8_t software_timer;
+#endif
 //========================================
 // Menu system
 //========================================
@@ -391,6 +395,8 @@ rising_ticks = 0;
     
 while (1) {
 	SPDR =0b00000000;
+	
+#if (USE_GPS==1)
 	if (UCSR0A & _BV(RXC0)) {
 		GPSbuffer[bufnr] = UDR0;
 
@@ -871,7 +877,16 @@ while (1) {
 			bufnr=0;
 		}
 	}
-		
+#else
+	if (software_timer >= VIDEO_FPS) {
+		software_timer = 0;
+		flight_time++;
+		flight_timer[0]=(( flight_time/600))+3;     
+		flight_timer[1]=(((flight_time%600)/60))+3;      
+		flight_timer[2]=((flight_time%600)%60)/10+3; 
+		flight_timer[3]=((flight_time%600)%60)%10+3; 
+	}
+#endif	
 #if (digital_rssi==1)  
 		
 	if (rssi_read) {

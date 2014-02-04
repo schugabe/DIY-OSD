@@ -134,6 +134,12 @@
 // 1 = on, 0 = off:
 #define Usebutton 0
 
+// if USE_GPS=0 the GPS information is not displayed and a different timer implementation based on the framerate is used
+#define USE_GPS	1
+
+// the frames per second delivered by the camera PAL=50, NTSC=60
+#define VIDEO_FPS 50
+
 //======================================================
 // Set alarms. Will blink when value is exceeded
 //======================================================

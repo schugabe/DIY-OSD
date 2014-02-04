@@ -61,9 +61,17 @@ extern unsigned char altituder[10];
 extern adc_filter_sum_t voltage_sum, current_sum;
 extern uint16_t filtered_voltage, filtered_current;
 
+#if (USE_GPS==0)
+volatile uint8_t software_timer = 0;
+#endif
+
 // frame output
 void detectframe() {
 	line = 0;
+	
+#if (USE_GPS==0)
+	software_timer++;
+#endif
 }
 
 void detectline() {
@@ -206,6 +214,7 @@ void detectline() {
 	////////////////////////////////////////////
 	// Top line big numbers
 	////////////////////////////////////////////
+#if (USE_GPS==1)
 	else if (line > toplinenumbers  && line < (toplinenumbers +font_lines_count)) {
 		// Used to align the text
 		_delay_loop_1(align_text);
@@ -383,6 +392,7 @@ void detectline() {
 			}
 		}
 	}
+#endif
 	////////////////////////////////////////////
 	// Top line big numbers END
 	////////////////////////////////////////////
@@ -507,6 +517,7 @@ void detectline() {
 	////////////////////////////////////////////
 	// Top line text
 	////////////////////////////////////////////
+#if (USE_GPS==1)
 	else if (line > toplinetext  && line < (toplinetext +9)) {
 		// Used to align the text
 		_delay_loop_1(align_text);
@@ -558,6 +569,7 @@ void detectline() {
 		delay13();
 		DimOff();
 	}
+#endif
 	////////////////////////////////////////////
 	// Top line text END
 	////////////////////////////////////////////
@@ -1394,7 +1406,9 @@ void detectline() {
 				}
 			}
 		}
-	} else if (line > gps_nmea_line  && line < (gps_nmea_line +9)) {
+	} 
+#if (USE_GPS==1)
+	else if (line > gps_nmea_line  && line < (gps_nmea_line +9)) {
 		// Used to align the text
 		_delay_loop_1(align_text);
 		if (line == (gps_nmea_line+1)) {
@@ -1551,6 +1565,7 @@ void detectline() {
 			}
 		}
 	}
+#endif
 	// ============================================================
 	// Bottom line text
 	// ============================================================
