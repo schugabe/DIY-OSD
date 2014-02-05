@@ -11,6 +11,8 @@ How-to
 
 The example config is set to display the signal quality from an ezuhf rx. It is necessary to configure the ezuhf rx to output the signal quality on a pin and connect the signal wire to the PB0 Pin. Depending on the setup it might be necessary to connect the ground wire of the rx to the ground pin of the OSD (watch out for ground loops!). For other rx types the values rssi_min and rssi_max found in config.h must be adjusted. To find out the necessary values it is possible to set show_raw_rssi. If show_raw_rssi is set to 1 the unmodified duration of the PWM signal is displayed as RSSI. The value of rssi_max is the value visible with the tx switched on and rssi_min is the value visible where fail-safe is activated.
 
+In the folder MeasureRSSI is a sketch that measures the digital RSSI signal and sends information to the serial interface.
+
 In this [picture](https://github.com/schugabe/DIY-OSD/blob/master/pb0.jpg "pb0") the location of PB0 is shown.
 
 Update the OSD Firmware:
