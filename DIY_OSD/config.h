@@ -153,7 +153,7 @@
 #define los_alarm_ 2000
 
 // Altitude alarm. altitude-number will blink if it exceeds the defined value. Should be written in meter, meaning 2000 meter = 2000, 4 km = 4000 etc. 
-#define alt_alarm_ 120
+#define alt_alarm_ 150
 
 //========================================================================
 // END SETUP

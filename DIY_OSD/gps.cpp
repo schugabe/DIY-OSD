@@ -927,6 +927,17 @@ while (1) {
 					rssi_measurements_count++;
 					rssi_reading = timer;
 				}
+				else if (timer < (rssi_min-10)) {
+					rssi_reading = 0;
+				}
+				else if (timer > (rssi_max+10)) {
+					rssi_reading = 100;
+				}
+				
+#if (show_raw_rssi == 1)
+				rssi_reading = timer;
+				rssi_measurements_count++;
+#endif
 			}
 		}
 	}
