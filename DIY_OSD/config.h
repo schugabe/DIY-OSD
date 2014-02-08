@@ -91,8 +91,14 @@
 #else
 	// Min/Max Values for rssi pwm duration, in this case for ezuhf signal quality.
     // example values for rssi signal, enable show_raw_rssi to find out min/max values here
+
+	// ezuhf link quality
 	#define rssi_min 2113
 	#define rssi_max 3586
+
+	// FrSky TFR4-B 
+	//#define rssi_min 200
+	//#define rssi_max 1900
 #endif
 
 // I was asked to make a calculation on mah/km - this can be useful to find the most efficient cruise-speed etc.

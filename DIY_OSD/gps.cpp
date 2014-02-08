@@ -928,7 +928,7 @@ while (1) {
 					rssi_reading = timer;
 				}
 				else if (timer < (rssi_min-10)) {
-					rssi_reading = 0;
+					rssi_reading = 1;
 				}
 				else if (timer > (rssi_max+10)) {
 					rssi_reading = 100;
