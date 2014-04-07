@@ -164,7 +164,11 @@ unsigned char total_distancer[] = {3,3,3,3,3};
 long max_alt=0;
 unsigned char max_altr[] = {3,3,3,3,3,3};
 
-unsigned char landed =1;
+#if (USE_GPS==1)
+unsigned char landed = 1;
+#else
+unsigned char landed = 0;
+#endif
 long altitude_num=0;
 long altitude_num2=0;
 int altitude_int=0;
@@ -884,7 +888,9 @@ while (1) {
 		flight_timer[0]=(( flight_time/600))+3;     
 		flight_timer[1]=(((flight_time%600)/60))+3;      
 		flight_timer[2]=((flight_time%600)%60)/10+3; 
-		flight_timer[3]=((flight_time%600)%60)%10+3; 
+		flight_timer[3]=((flight_time%600)%60)%10+3;
+        if (flight_time > 10)
+            homepos = 1;
 	}
 #endif	
 #if (digital_rssi==1)  
