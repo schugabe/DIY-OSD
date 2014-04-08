@@ -144,7 +144,11 @@
 #define USE_GPS	1
 
 // the frames per second delivered by the camera PAL=50, NTSC=60
-#define VIDEO_FPS 50
+#if (VIDEO_SYSTEM==0)
+    #define VIDEO_FPS 50
+#else
+    #define VIDEO_FPS 60
+#endif
 
 //======================================================
 // Set alarms. Will blink when value is exceeded

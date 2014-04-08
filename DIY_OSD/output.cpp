@@ -957,9 +957,11 @@ void detectline() {
 				}
 			}
 			#endif
-		} else if (homepos == 0) {
+		} 
+        else if (homepos == 0) {
 			temp = line - (summaryline +1);
 			_delay_loop_1(17);
+#if (USE_GPS==1)
 			if (temp < 8) {
 				_delay_loop_1(65);
 				buffer[0]=('S'-64)<<3;
@@ -1090,6 +1092,7 @@ void detectline() {
 					DimOff();
 				}
 			}
+#endif
 			if (temp > 80 && temp < 89) {
 				temp = line - (summaryline +82);
 				_delay_loop_1(20);
@@ -1119,7 +1122,9 @@ void detectline() {
 				delay15();
 				DimOff();
 			}
-		} else {
+		}
+#if (USE_GPS==1)
+        else {
 			if (landed == 1) {
 				_delay_loop_1(25);
 				temp = line - (summaryline +1);
@@ -1406,6 +1411,7 @@ void detectline() {
 				}
 			}
 		}
+#endif
 	} 
 #if (USE_GPS==1)
 	else if (line > gps_nmea_line  && line < (gps_nmea_line +9)) {
