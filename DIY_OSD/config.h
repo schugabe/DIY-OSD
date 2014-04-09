@@ -237,14 +237,13 @@
 // SimpleOSD X2 16 mhz
 #else
 	// Input from current-sensor and voltage-divider
-	#define voltage_divider_input 2
+    
+    // #define voltage_divider_input 0 // Original Input
+	#define voltage_divider_input 2 // Use this if the OSD is powered by a clean 5V source
 	#define current_sensor_input 1
 	#define rssi_input 3 // The input pin for analog rssi is adc2 (PC2 or AN2 on scematic)
-
-	// Button is connected to:
-	#define Buttonpin_ 6
-	
-	#define RSSI_INPUT_PIN 8
+	#define Buttonpin_ 6 // Button is connected to:
+	#define RSSI_INPUT_PIN 8 // The input pin for digital rssi
     #define dim_pin 9
 
 	#if (dim_on == 1)

@@ -33,7 +33,7 @@ extern unsigned char menupos;
 extern unsigned char menu;
 extern unsigned char altitude_offset_on;
 extern char GPSbuffer[100];
-extern char homepos;
+extern volatile char homepos;
 extern unsigned char satellitesr[3];
 extern char GPSfix;
 extern int homeposcount;

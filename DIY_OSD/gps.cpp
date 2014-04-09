@@ -24,7 +24,7 @@ int iiii =0;
 //==================================
 
 // Has homeposition been set?
-char homepos=0;
+volatile char homepos=0;
 // Simple way to make a little delay before the homeposition is set. (It waits for GPS-fix, waits a couple of extra seconds and set homeposition)
 int homeposcount=0;
 
