@@ -133,7 +133,7 @@ int count =0;
 //========================================
 // Data read from GPS
 //========================================
-unsigned char time[14]={1,1,1,1,1,1,1,1,1,1,1,1};;
+unsigned char time[14]={1,1,1,1,1,1,1,1,1,1,1,1};
 unsigned char speedkn[10]={1,1,1,1,1};
 unsigned char speedkn2[10]={1,1,1,1,1};
 unsigned char speedkmw[5]={1,1,1,1,1};
@@ -483,7 +483,20 @@ while (1) {
 						n++;
 					}
 				}
-      
+                
+                // convert timezone from utc to local time
+                int8_t tmp_hour = time[0]-'0';
+                tmp_hour = tmp_hour*10+(time[1]-'0');
+                tmp_hour += UTC_OFFSET;
+                
+                if (tmp_hour < 0)
+                    tmp_hour = 24+tmp_hour;
+                else if (tmp_hour >=24)
+                    tmp_hour -= 24;
+                
+                time[0] = '0'+(tmp_hour/10);
+                time[1] = '0'+(tmp_hour%10);
+
 				speedkn2[0]=speedkn[0];
 				speedkn2[1]=speedkn[1];
 				speedkn2[2]=speedkn[2];
