@@ -391,8 +391,10 @@ void gps() {
 }
 #endif
 
+#if (digital_rssi==1) 
 SET_RISING();
 rising_ticks = 0;
+#endif
     
 while (1) {
 	SPDR =0b00000000;
