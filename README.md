@@ -13,7 +13,9 @@ The example config is set to display the signal quality from an ezuhf rx. It is 
 
 In the folder MeasureRSSI is a sketch that measures the digital RSSI signal and sends information to the serial interface.
 
-In this [picture](https://github.com/schugabe/DIY-OSD/blob/master/pb0.jpg "pb0") the location of PB0 is shown.
+In this the location of PB0 is shown:
+
+![pb0 location](https://github.com/schugabe/DIY-OSD/blob/master/pb0.jpg) 
 
 Update the OSD Firmware:
 * Download the code and open DIY_OSD.ino in the Arduino editor (download from http://arduino.cc/en/Main/Software_ )
