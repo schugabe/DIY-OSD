@@ -4,6 +4,7 @@
 // www.rcgroups.com/forums/showthread.php?t=1473207
 // Support DIY hardware, SimpleOSD Open and Simple OSD X2
 
+#include <Arduino.h>
 #include "config.h"
 #include "output.h"
 #include "gps.h"
