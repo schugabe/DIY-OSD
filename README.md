@@ -1,6 +1,8 @@
 DIY-OSD
 =======
 
+![Build DIY-OSD](https://github.com/schugabe/DIY-OSD/workflows/Build%20DIY-OSD/badge.svg)
+
 This firmware is an updated version of the DIY OSD firmware ( http://www.rcgroups.com/forums/showthread.php?t=1473207 ) that includes support for the SimpleOSD X2 from Flytron.
 
 Beside of general improvements and small bug fixes this firmware supports digital rssi indication. Additionally a software low pass filter has been added to smooth the current/voltage readings.
