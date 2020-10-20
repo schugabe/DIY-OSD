@@ -1,7 +1,7 @@
 DIY-OSD
 =======
 
-![Build DIY-OSD](https://github.com/schugabe/DIY-OSD/workflows/Build%20DIY-OSD/badge.svg)
+![Build DIY-OSD](https://github.com/schugabe/DIY-OSD/workflows/Build%20DIY-OSD/badge.svg?branch=master)
 
 This firmware is an updated version of the DIY OSD firmware ( http://www.rcgroups.com/forums/showthread.php?t=1473207 ) that includes support for the SimpleOSD X2 from Flytron.
 
